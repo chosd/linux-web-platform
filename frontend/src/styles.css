@@ -1,0 +1,208 @@
+:root {
+  color: #e7edf3;
+  background: #1a1f24;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+button {
+  border: 1px solid #4c6478;
+  border-radius: 6px;
+  background: #26323d;
+  color: #f4f7fa;
+  cursor: pointer;
+  font: inherit;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.terminal-page {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.terminal-toolbar {
+  align-items: center;
+  background: #202832;
+  border-bottom: 1px solid #344352;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.terminal-toolbar h1 {
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+
+.connection-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+
+.status-message {
+  color: #b9c6d1;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.status-connecting {
+  background: #5a4a1d;
+  color: #ffe08a;
+}
+
+.status-connected {
+  background: #173f32;
+  color: #79e2b0;
+}
+
+.status-disconnected {
+  background: #413946;
+  color: #d8c6df;
+}
+
+.status-error {
+  background: #53272a;
+  color: #ffb7bd;
+}
+
+.terminal-workspace {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.terminal-shell {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.terminal-host {
+  background: #101418;
+  border: 1px solid #344352;
+  border-radius: 8px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  width: 100%;
+}
+
+.usage-panel {
+  background: #202832;
+  border: 1px solid #344352;
+  border-radius: 8px;
+  color: #d6dee6;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.usage-panel h2 {
+  color: #f4f7fa;
+  font-size: 13px;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.usage-panel h2:not(:first-child) {
+  margin-top: 18px;
+}
+
+.usage-panel ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.usage-panel li {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 8px;
+}
+
+.usage-panel code {
+  background: #111820;
+  border: 1px solid #344352;
+  border-radius: 5px;
+  color: #dfe7ee;
+  display: block;
+  font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 7px 8px;
+}
+
+.terminal-host .xterm {
+  height: 100%;
+}
+
+.terminal-host .xterm-screen {
+  height: 100%;
+}
+
+.terminal-host .xterm-viewport {
+  overflow-y: auto;
+}
+
+.terminal-host .xterm-cursor {
+  animation-duration: 1s;
+}
+
+@media (max-width: 640px) {
+  .terminal-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .terminal-toolbar button {
+    width: 100%;
+  }
+
+  .terminal-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 8px;
+  }
+
+  .terminal-host {
+    min-height: 0;
+  }
+}

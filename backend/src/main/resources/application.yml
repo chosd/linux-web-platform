@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+terminal:
+  image: linux-terminal-playground:ubuntu
+  idle-timeout: 10m
+  cleanup-interval: 1m
+  allowed-origins:
+    - http://localhost:5173
+    - http://127.0.0.1:5173
+  docker:
+    executable: docker
+    cpus: "0.5"
+    memory: 256m
+    pids-limit: 64
+    network: none
+    user: student
+    workdir: /home/student
+    command:
+      - /usr/bin/script
+      - -qfec
+      - /bin/bash --login
+      - /dev/null
+    container-name-prefix: linux-terminal
+    container-name-session-id-length: 24
