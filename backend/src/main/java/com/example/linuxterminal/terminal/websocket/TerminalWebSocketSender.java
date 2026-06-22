@@ -1,17 +1,17 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.websocket;
 
+import com.example.linuxterminal.terminal.core.WebSocketMessageSender;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+@Slf4j
 @Component
-public class TerminalWebSocketSender {
+public class TerminalWebSocketSender implements WebSocketMessageSender {
 
-    private static final Logger log = LoggerFactory.getLogger(TerminalWebSocketSender.class);
-
+    @Override
     public boolean sendText(WebSocketSession session, String payload) {
         synchronized (session) {
             if (!session.isOpen()) {

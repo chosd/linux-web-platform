@@ -15,13 +15,16 @@ backend/
   src/main/java/com/example/linuxterminal/
     LinuxTerminalApplication.java
     terminal/
-      WebSocketConfig.java
-      TerminalWebSocketHandler.java
-      TerminalSession.java
-      TerminalSessionManager.java
-      DockerTerminalService.java
-      TerminalProperties.java
+      config/
+      core/
+      docker/
+      io/
+      repository/
+      service/
+      websocket/
   src/main/resources/application.yml
+  build.gradle
+  settings.gradle
 frontend/
   src/terminal/TerminalView.tsx
 docker/
@@ -38,7 +41,7 @@ docker build -t linux-terminal-playground:ubuntu docker/terminal
 
 ```bash
 cd backend
-mvn spring-boot:run
+./gradlew bootRun
 ```
 
 기본 WebSocket endpoint는 다음과 같습니다.
@@ -89,7 +92,7 @@ docker ps -a --filter "name=linux-terminal-"
 
 ```bash
 cd backend
-mvn test
+./gradlew test
 ```
 
 프론트엔드 빌드 테스트:

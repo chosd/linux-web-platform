@@ -1,4 +1,4 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.config;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -176,3 +176,4 @@ public class TerminalProperties {
         }
     }
 }
+

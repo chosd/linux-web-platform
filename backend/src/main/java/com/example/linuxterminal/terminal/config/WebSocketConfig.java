@@ -1,5 +1,6 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.config;
 
+import com.example.linuxterminal.terminal.websocket.TerminalWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -23,3 +24,4 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .setAllowedOrigins(terminalProperties.getAllowedOrigins().toArray(String[]::new));
     }
 }
+

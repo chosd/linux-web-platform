@@ -1,4 +1,4 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.core;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -84,3 +84,4 @@ public class TerminalSession {
         }
     }
 }
+

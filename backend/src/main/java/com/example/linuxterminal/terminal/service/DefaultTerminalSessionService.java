@@ -1,27 +1,28 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.service;
 
+import com.example.linuxterminal.terminal.config.TerminalProperties;
+import com.example.linuxterminal.terminal.core.TerminalRuntime;
+import com.example.linuxterminal.terminal.core.TerminalSession;
+import com.example.linuxterminal.terminal.core.TerminalSessionRepository;
+import com.example.linuxterminal.terminal.core.TerminalSessionService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 
-@Component
-public class TerminalSessionManager {
+@Slf4j
+@Service
+public class DefaultTerminalSessionService implements TerminalSessionService {
 
-    private static final Logger log = LoggerFactory.getLogger(TerminalSessionManager.class);
-
-    private final Map<String, TerminalSession> sessions = new ConcurrentHashMap<>();
-    private final DockerTerminalService dockerTerminalService;
+    private final TerminalSessionRepository terminalSessionRepository;
+    private final TerminalRuntime terminalRuntime;
     private final TerminalProperties properties;
     private final ScheduledExecutorService cleanupExecutor = Executors.newSingleThreadScheduledExecutor(
             runnable -> {
@@ -30,8 +31,13 @@ public class TerminalSessionManager {
                 return thread;
             });
 
-    public TerminalSessionManager(DockerTerminalService dockerTerminalService, TerminalProperties properties) {
-        this.dockerTerminalService = dockerTerminalService;
+    public DefaultTerminalSessionService(
+            TerminalSessionRepository terminalSessionRepository,
+            TerminalRuntime terminalRuntime,
+            TerminalProperties properties
+    ) {
+        this.terminalSessionRepository = terminalSessionRepository;
+        this.terminalRuntime = terminalRuntime;
         this.properties = properties;
     }
 
@@ -48,26 +54,26 @@ public class TerminalSessionManager {
     @PreDestroy
     void shutdownCleanupScheduler() {
         cleanupExecutor.shutdownNow();
-        sessions.keySet().forEach(sessionId -> close(
+        terminalSessionRepository.forEach((sessionId, terminalSession) -> close(
                 sessionId,
                 "application shutdown",
                 CloseStatus.SERVICE_RESTARTED.withReason("Server is shutting down.")));
     }
 
+    @Override
     public void create(WebSocketSession webSocketSession) throws IOException {
         TerminalSession terminalSession;
         try {
-            terminalSession = dockerTerminalService.start(webSocketSession);
+            terminalSession = terminalRuntime.start(webSocketSession);
         } catch (IOException exception) {
             log.warn("Failed to start terminal session. sessionId={}", webSocketSession.getId(), exception);
             closeWebSocket(webSocketSession,
                     CloseStatus.SERVER_ERROR.withReason("Terminal server could not start Docker."));
             throw exception;
         }
-        sessions.put(webSocketSession.getId(), terminalSession);
-        dockerTerminalService.streamToWebSocket(terminalSession, terminalSession.getProcess().getInputStream(), "stdout");
-        dockerTerminalService.streamToWebSocket(terminalSession, terminalSession.getProcess().getErrorStream(), "stderr");
-        dockerTerminalService.waitForExit(terminalSession,
+        terminalSessionRepository.save(terminalSession);
+        terminalRuntime.streamToClient(terminalSession);
+        terminalRuntime.waitForExit(terminalSession,
                 exitCode -> close(
                         webSocketSession.getId(),
                         "container process exited: " + exitCode,
@@ -76,38 +82,43 @@ public class TerminalSessionManager {
                 webSocketSession.getId(), terminalSession.getContainerName());
     }
 
+    @Override
     public void write(String webSocketSessionId, String payload) throws IOException {
-        TerminalSession terminalSession = sessions.get(webSocketSessionId);
+        TerminalSession terminalSession = terminalSessionRepository.findById(webSocketSessionId).orElse(null);
         if (terminalSession == null || terminalSession.isClosed()) {
             return;
         }
         terminalSession.write(payload);
     }
 
+    @Override
     public void close(String webSocketSessionId, String reason) {
         close(webSocketSessionId, reason, false);
     }
 
+    @Override
     public void close(String webSocketSessionId, String reason, boolean closeWebSocket) {
         close(webSocketSessionId, reason,
                 closeWebSocket ? CloseStatus.SERVER_ERROR.withReason(reason) : null);
     }
 
+    @Override
     public void close(String webSocketSessionId, String reason, CloseStatus closeStatus) {
-        TerminalSession terminalSession = sessions.remove(webSocketSessionId);
+        TerminalSession terminalSession = terminalSessionRepository.remove(webSocketSessionId).orElse(null);
         if (terminalSession == null) {
             return;
         }
         log.info("Terminal session closing. sessionId={} reason={}", webSocketSessionId, reason);
-        dockerTerminalService.remove(terminalSession);
+        terminalRuntime.remove(terminalSession);
         if (closeStatus != null) {
             closeWebSocket(terminalSession.getWebSocketSession(), closeStatus);
         }
     }
 
+    @Override
     public void cleanupIdleSessions() {
         Instant now = Instant.now();
-        sessions.forEach((sessionId, terminalSession) -> {
+        terminalSessionRepository.forEach((sessionId, terminalSession) -> {
             if (terminalSession.isIdle(properties.getIdleTimeout(), now)) {
                 close(sessionId, "idle timeout",
                         CloseStatus.SESSION_NOT_RELIABLE.withReason("Idle timeout. Terminal closed."));

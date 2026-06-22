@@ -1,5 +1,6 @@
-package com.example.linuxterminal.terminal;
+package com.example.linuxterminal.terminal.docker;
 
+import com.example.linuxterminal.terminal.config.TerminalProperties;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -38,3 +39,4 @@ public class DockerCommandFactory {
         return List.of(properties.getDocker().getExecutable(), "rm", "-f", containerName);
     }
 }
+
