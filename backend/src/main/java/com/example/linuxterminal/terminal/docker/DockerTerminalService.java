@@ -36,6 +36,7 @@ public class DockerTerminalService implements TerminalRuntime {
     public TerminalSession start(WebSocketSession webSocketSession) throws IOException {
         String containerName = containerNameGenerator.create(webSocketSession.getId());
         List<String> command = dockerCommandFactory.runCommand(containerName);
+        log.info("[COMMAND][{}]", command);
         Process process = new ProcessBuilder(command).start();
         return new TerminalSession(webSocketSession.getId(), webSocketSession, containerName, process);
     }

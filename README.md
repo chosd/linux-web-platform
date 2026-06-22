@@ -44,6 +44,12 @@ cd backend
 ./gradlew bootRun
 ```
 
+루트에서 실행할 수도 있습니다.
+
+```bash
+./scripts/dev-backend.sh
+```
+
 기본 WebSocket endpoint는 다음과 같습니다.
 
 ```text
@@ -56,8 +62,14 @@ ws://localhost:8080/ws/terminal
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
+```
+
+루트에서 실행할 수도 있습니다.
+
+```bash
+./scripts/dev-frontend.sh
 ```
 
 필요하면 `.env.local`에 WebSocket URL을 지정합니다.
@@ -99,7 +111,28 @@ cd backend
 
 ```bash
 cd frontend
-npm run build
+pnpm run build
+```
+
+전체 테스트와 빌드를 루트에서 한 번에 실행할 수 있습니다.
+
+```bash
+./scripts/test-all.sh
+./scripts/build-all.sh
+```
+
+백엔드 Gradle 빌드는 프론트엔드 설치, Vite 빌드, 정적 리소스 복사, JAR 패키징을 함께 수행합니다.
+
+```bash
+cd backend
+./gradlew build
+```
+
+pnpm이 일반 PATH에 없으면 `PNPM_COMMAND`로 경로를 지정할 수 있습니다.
+
+```bash
+cd backend
+PNPM_COMMAND=/path/to/pnpm ./gradlew build
 ```
 
 ## 현재 구현 범위
