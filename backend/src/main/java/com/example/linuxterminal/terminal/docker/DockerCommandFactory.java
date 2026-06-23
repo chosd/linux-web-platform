@@ -14,12 +14,12 @@ public class DockerCommandFactory {
         this.properties = properties;
     }
 
-    public List<String> runCommand(String containerName) {
+    public List<String> runDetachedCommand(String containerName) {
         TerminalProperties.Docker docker = properties.getDocker();
         List<String> command = new ArrayList<>();
         command.add(docker.getExecutable());
         command.add("run");
-        command.add("-i");
+        command.add("-d");
         command.add("--name");
         command.add(containerName);
         command.add("--cpus=" + docker.getCpus());
@@ -31,12 +31,41 @@ public class DockerCommandFactory {
         command.add("--workdir");
         command.add(docker.getWorkdir());
         command.add(properties.getImage());
-        command.addAll(docker.getCommand());
+        command.add("tail");
+        command.add("-f");
+        command.add("/dev/null");
         return command;
     }
 
-    public List<String> removeCommand(String containerName) {
-        return List.of(properties.getDocker().getExecutable(), "rm", "-f", containerName);
+    public List<String> execCommand(String containerName) {
+        List<String> command = new ArrayList<>();
+        command.add(properties.getDocker().getExecutable());
+        command.add("exec");
+        command.add("-i");
+        command.add(containerName);
+        command.addAll(properties.getDocker().getCommand());
+        return command;
     }
-}
 
+    public List<String> inspectStatusCommand(String containerName) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "inspect",
+                "-f",
+                "{{.State.Status}}",
+                containerName);
+    }
+
+    public List<String> startCommand(String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "start", containerName);
+    }
+
+    public List<String> stopCommand(String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "stop", containerName);
+    }
+
+    public List<String> restartCommand(String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "restart", containerName);
+    }
+
+}

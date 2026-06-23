@@ -1,11 +1,13 @@
 package com.example.linuxterminal.config;
 
+import com.example.linuxterminal.terminal.config.TerminalProperties;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
@@ -16,6 +18,22 @@ public class SpaWebMvcConfig implements WebMvcConfigurer {
     private static final String INDEX_FORWARD = "forward:/index.html";
     private static final Controller SPA_FORWARD_CONTROLLER =
             (request, response) -> new ModelAndView(INDEX_FORWARD);
+
+    private final TerminalProperties terminalProperties;
+
+    public SpaWebMvcConfig(TerminalProperties terminalProperties) {
+        this.terminalProperties = terminalProperties;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins(terminalProperties.getAllowedOrigins().toArray(String[]::new))
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("Content-Type", "X-User-Id")
+                .allowCredentials(false)
+                .maxAge(3600);
+    }
 
     @Bean
     public HandlerMapping spaFallbackHandlerMapping() {

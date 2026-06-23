@@ -6,7 +6,10 @@ import com.example.linuxterminal.terminal.core.TerminalSession;
 import com.example.linuxterminal.terminal.io.TerminalProcessWatcher;
 import com.example.linuxterminal.terminal.io.TerminalStreamForwarder;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
@@ -16,29 +19,40 @@ import org.springframework.web.socket.WebSocketSession;
 public class DockerTerminalService implements TerminalRuntime {
 
     private final DockerCommandFactory dockerCommandFactory;
-    private final ContainerNameGenerator containerNameGenerator;
+    private final ContainerManagementService containerManagementService;
     private final TerminalStreamForwarder terminalStreamForwarder;
     private final TerminalProcessWatcher terminalProcessWatcher;
 
     public DockerTerminalService(
             DockerCommandFactory dockerCommandFactory,
-            ContainerNameGenerator containerNameGenerator,
+            ContainerManagementService containerManagementService,
             TerminalStreamForwarder terminalStreamForwarder,
             TerminalProcessWatcher terminalProcessWatcher
     ) {
         this.dockerCommandFactory = dockerCommandFactory;
-        this.containerNameGenerator = containerNameGenerator;
+        this.containerManagementService = containerManagementService;
         this.terminalStreamForwarder = terminalStreamForwarder;
         this.terminalProcessWatcher = terminalProcessWatcher;
     }
 
     @Override
     public TerminalSession start(WebSocketSession webSocketSession) throws IOException {
-        String containerName = containerNameGenerator.create(webSocketSession.getId());
-        List<String> command = dockerCommandFactory.runCommand(containerName);
+        String userId = resolveUserId(webSocketSession);
+        String requestedContainerName = resolveQueryParameter(webSocketSession, "containerName");
+        ContainerManagementService.ContainerInfo containerInfo =
+                requestedContainerName == null
+                        ? containerManagementService.startOrGetContainer(userId)
+                        : containerManagementService.ensureContainerRunning(userId, requestedContainerName);
+        containerManagementService.markConnected(containerInfo.containerName());
+        List<String> command = dockerCommandFactory.execCommand(containerInfo.containerName());
         log.info("[COMMAND][{}]", command);
         Process process = new ProcessBuilder(command).start();
-        return new TerminalSession(webSocketSession.getId(), webSocketSession, containerName, process);
+        return new TerminalSession(
+                webSocketSession.getId(),
+                containerInfo.userId(),
+                webSocketSession,
+                containerInfo.containerName(),
+                process);
     }
 
     @Override
@@ -52,23 +66,7 @@ public class DockerTerminalService implements TerminalRuntime {
         if (process.isAlive()) {
             process.destroy();
         }
-
-        List<String> command = dockerCommandFactory.removeCommand(terminalSession.getContainerName());
-        try {
-            Process rmProcess = new ProcessBuilder(command).start();
-            int exitCode = rmProcess.waitFor();
-            if (exitCode != 0) {
-                log.warn("Docker container cleanup finished with non-zero exitCode. containerName={} exitCode={}",
-                        terminalSession.getContainerName(), exitCode);
-            }
-        } catch (IOException exception) {
-            log.warn("Failed to start docker cleanup process. containerName={}",
-                    terminalSession.getContainerName(), exception);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            log.warn("Interrupted while cleaning docker container. containerName={}",
-                    terminalSession.getContainerName(), exception);
-        }
+        containerManagementService.markDisconnected(terminalSession.getContainerName());
     }
 
     @Override
@@ -80,5 +78,27 @@ public class DockerTerminalService implements TerminalRuntime {
     @Override
     public void waitForExit(TerminalSession terminalSession, TerminalProcessExitHandler onExit) {
         terminalProcessWatcher.waitForExit(terminalSession, onExit);
+    }
+
+    private String resolveUserId(WebSocketSession webSocketSession) {
+        String userId = resolveQueryParameter(webSocketSession, "userId");
+        return userId == null ? "anonymous" : userId;
+    }
+
+    private String resolveQueryParameter(WebSocketSession webSocketSession, String name) {
+        String rawQuery = webSocketSession.getUri() == null ? null : webSocketSession.getUri().getRawQuery();
+        if (rawQuery == null || rawQuery.isBlank()) {
+            return null;
+        }
+        for (String parameter : rawQuery.split("&")) {
+            String[] parts = parameter.split("=", 2);
+            if (parts.length == 2 && Objects.equals(parts[0], name)) {
+                String value = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
+                if (!value.isBlank()) {
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 }

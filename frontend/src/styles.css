@@ -33,6 +33,187 @@ button:disabled {
   opacity: 0.55;
 }
 
+.primary-button {
+  background: #2f6fed;
+  border-color: #5f91ff;
+}
+
+.dashboard-page {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboard-header {
+  align-items: center;
+  background: #202832;
+  border-bottom: 1px solid #344352;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px;
+}
+
+.dashboard-header h1 {
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 0 0 5px;
+}
+
+.dashboard-header p {
+  color: #b9c6d1;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.error-banner {
+  background: #53272a;
+  border-bottom: 1px solid #7d3d42;
+  color: #ffccd1;
+  padding: 10px 18px;
+}
+
+.container-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.container-card,
+.empty-state {
+  background: #202832;
+  border: 1px solid #344352;
+  border-radius: 8px;
+}
+
+.container-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 210px;
+  padding: 16px;
+}
+
+.container-card-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.container-card h2 {
+  font-size: 16px;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.container-status {
+  border-radius: 999px;
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+
+.status-running {
+  background: #173f32;
+  color: #79e2b0;
+}
+
+.status-exited,
+.status-not_found {
+  background: #413946;
+  color: #d8c6df;
+}
+
+.container-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.container-card dt {
+  color: #8ea0af;
+  font-size: 11px;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.container-card dd {
+  color: #e7edf3;
+  font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  font-size: 12px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.container-card button {
+  margin-top: auto;
+}
+
+.empty-state {
+  color: #b9c6d1;
+  grid-column: 1 / -1;
+  padding: 28px;
+  text-align: center;
+}
+
+.modal-backdrop {
+  align-items: center;
+  background: rgb(0 0 0 / 0.55);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 18px;
+  position: fixed;
+  z-index: 20;
+}
+
+.modal-panel {
+  background: #202832;
+  border: 1px solid #4c6478;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  max-width: 420px;
+  padding: 18px;
+  width: 100%;
+}
+
+.modal-panel header,
+.modal-panel footer {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.modal-panel h2 {
+  font-size: 17px;
+  margin: 0;
+}
+
+.modal-panel label {
+  color: #c8d4df;
+  font-size: 13px;
+}
+
+.modal-panel input {
+  background: #101820;
+  border: 1px solid #4c6478;
+  border-radius: 6px;
+  color: #f4f7fa;
+  font: inherit;
+  min-height: 38px;
+  padding: 0 10px;
+}
+
 .terminal-page {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -56,6 +237,17 @@ button:disabled {
   font-weight: 650;
   line-height: 1.2;
   margin: 0 0 6px;
+}
+
+.terminal-subtitle {
+  color: #b9c6d1;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.terminal-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .connection-row {
@@ -192,8 +384,19 @@ button:disabled {
     flex-direction: column;
   }
 
-  .terminal-toolbar button {
+  .terminal-toolbar button,
+  .terminal-actions,
+  .dashboard-header button {
     width: 100%;
+  }
+
+  .dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .terminal-actions {
+    flex-direction: column;
   }
 
   .terminal-workspace {

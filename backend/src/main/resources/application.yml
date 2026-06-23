@@ -3,8 +3,8 @@ server:
 
 terminal:
   image: linux-terminal-playground:ubuntu
-  idle-timeout: 10m
-  cleanup-interval: 1m
+  idle-timeout: 30m
+  cleanup-interval: 60000
   allowed-origins:
     - http://localhost:5173
     - http://127.0.0.1:5173

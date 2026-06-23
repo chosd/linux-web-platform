@@ -11,6 +11,7 @@ import org.springframework.web.socket.WebSocketSession;
 public class TerminalSession {
 
     private final String webSocketSessionId;
+    private final String userId;
     private final WebSocketSession webSocketSession;
     private final String containerName;
     private final Process process;
@@ -21,11 +22,13 @@ public class TerminalSession {
 
     public TerminalSession(
             String webSocketSessionId,
+            String userId,
             WebSocketSession webSocketSession,
             String containerName,
             Process process
     ) {
         this.webSocketSessionId = webSocketSessionId;
+        this.userId = userId;
         this.webSocketSession = webSocketSession;
         this.containerName = containerName;
         this.process = process;
@@ -34,6 +37,10 @@ public class TerminalSession {
 
     public String getWebSocketSessionId() {
         return webSocketSessionId;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public WebSocketSession getWebSocketSession() {
@@ -80,8 +87,7 @@ public class TerminalSession {
         try {
             stdin.close();
         } catch (IOException ignored) {
-            // Closing input is best effort because docker rm -f performs the final cleanup.
+            // Closing input is best effort because the Docker exec process performs the final cleanup.
         }
     }
 }
-

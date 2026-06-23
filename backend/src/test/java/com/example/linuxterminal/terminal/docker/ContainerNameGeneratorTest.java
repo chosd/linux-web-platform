@@ -8,25 +8,24 @@ import org.junit.jupiter.api.Test;
 class ContainerNameGeneratorTest {
 
     @Test
-    void createSanitizesWebSocketSessionId() {
+    void forUserCreatesStableSanitizedContainerName() {
         ContainerNameGenerator generator = new ContainerNameGenerator(new TerminalProperties());
 
-        String containerName = generator.create("../ABC:raw session id!!!");
+        String containerName = generator.forUser("../User 123!!!");
 
-        assertThat(containerName).startsWith("linux-terminal-abc-raw-session-id-");
+        assertThat(containerName).isEqualTo("user-123_container");
         assertThat(containerName).matches("[a-z0-9_.-]+");
         assertThat(containerName).doesNotContain(":");
         assertThat(containerName).doesNotContain("/");
     }
 
     @Test
-    void createFallsBackWhenSessionIdHasNoUsableCharacters() {
+    void forUserFallsBackWhenUserIdHasNoUsableCharacters() {
         ContainerNameGenerator generator = new ContainerNameGenerator(new TerminalProperties());
 
-        String containerName = generator.create("/////");
+        String containerName = generator.forUser("/////");
 
-        assertThat(containerName).startsWith("linux-terminal-session-");
+        assertThat(containerName).isEqualTo("anonymous_container");
         assertThat(containerName).matches("[a-z0-9_.-]+");
     }
 }
-

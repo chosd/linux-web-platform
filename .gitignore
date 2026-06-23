@@ -28,6 +28,7 @@ frontend/.pnpm-data/
 backend/target/
 backend/build/
 backend/.gradle/
+backend/data/
 
 # Java
 *.class

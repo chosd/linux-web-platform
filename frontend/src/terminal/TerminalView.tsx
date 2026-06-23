@@ -6,6 +6,7 @@ import '@xterm/xterm/css/xterm.css';
 type ConnectionStatus = 'Connecting' | 'Connected' | 'Disconnected' | 'Error';
 
 const defaultWsUrl = `ws://${window.location.hostname}:8080/ws/terminal`;
+const userId = import.meta.env.VITE_USER_ID || 'anonymous';
 const welcomeMessage = [
   'Linux Terminal Playground',
   'Commands run inside an isolated Ubuntu Docker container.',
@@ -34,7 +35,13 @@ function messageForClose(event: CloseEvent) {
   return 'Connection closed.';
 }
 
-export function TerminalView() {
+type TerminalViewProps = {
+  containerName: string;
+  displayName: string;
+  onBack: () => void;
+};
+
+export function TerminalView({ containerName, displayName, onBack }: TerminalViewProps) {
   const terminalElementRef = useRef<HTMLDivElement | null>(null);
   const terminalRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -71,11 +78,12 @@ export function TerminalView() {
       return;
     }
 
-    const wsUrl = import.meta.env.VITE_TERMINAL_WS_URL || defaultWsUrl;
+    const baseWsUrl = import.meta.env.VITE_TERMINAL_WS_URL || defaultWsUrl;
+    const wsUrl = `${baseWsUrl}?userId=${encodeURIComponent(userId)}&containerName=${encodeURIComponent(containerName)}`;
     const connectionId = connectionIdRef.current;
     setStatus('Connecting');
-    setStatusMessage(`Connecting to ${wsUrl}`);
-    terminal.writeln('\r\n[system] Connecting to terminal...');
+    setStatusMessage(`Connecting to ${displayName}`);
+    terminal.writeln(`\r\n[system] Connecting to ${displayName}...`);
 
     const socket = new WebSocket(wsUrl);
     socketRef.current = socket;
@@ -116,7 +124,7 @@ export function TerminalView() {
         terminal.writeln(`\r\n[system] ${userMessage}`);
       }
     };
-  }, [disconnect, fitTerminal]);
+  }, [containerName, disconnect, displayName, fitTerminal]);
 
   useEffect(() => {
     if (!terminalElementRef.current) {
@@ -184,14 +192,18 @@ export function TerminalView() {
       <header className="terminal-toolbar">
         <div>
           <h1>Linux Terminal Playground</h1>
+          <div className="terminal-subtitle">{displayName}</div>
           <div className="connection-row">
             <span className={`status status-${status.toLowerCase()}`}>{status}</span>
             <span className="status-message">{statusMessage}</span>
           </div>
         </div>
-        <button type="button" onClick={connect} disabled={status === 'Connecting'}>
-          Reconnect
-        </button>
+        <div className="terminal-actions">
+          <button type="button" onClick={onBack}>Dashboard</button>
+          <button type="button" onClick={connect} disabled={status === 'Connecting'}>
+            Reconnect
+          </button>
+        </div>
       </header>
       <div className="terminal-workspace">
         <section className="terminal-shell" aria-label="Linux terminal">
@@ -203,8 +215,8 @@ export function TerminalView() {
             <li>Type commands directly in the terminal.</li>
             <li>Press Enter to run the current command.</li>
             <li>Account: student</li>
-            <li>All commands run inside the Docker container.</li>
-            <li>Reconnect starts a new terminal session.</li>
+            <li>All commands run inside the selected Docker container.</li>
+            <li>Reconnect attaches to the same container.</li>
           </ul>
           <h2>Try</h2>
           <code>pwd</code>

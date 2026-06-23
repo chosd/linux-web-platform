@@ -5,6 +5,7 @@ import com.example.linuxterminal.terminal.core.TerminalRuntime;
 import com.example.linuxterminal.terminal.core.TerminalSession;
 import com.example.linuxterminal.terminal.core.TerminalSessionRepository;
 import com.example.linuxterminal.terminal.core.TerminalSessionService;
+import com.example.linuxterminal.terminal.docker.ContainerManagementService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class DefaultTerminalSessionService implements TerminalSessionService {
     private final TerminalSessionRepository terminalSessionRepository;
     private final TerminalRuntime terminalRuntime;
     private final TerminalProperties properties;
+    private final ContainerManagementService containerManagementService;
     private final ScheduledExecutorService cleanupExecutor = Executors.newSingleThreadScheduledExecutor(
             runnable -> {
                 Thread thread = new Thread(runnable, "terminal-idle-cleanup");
@@ -34,11 +36,13 @@ public class DefaultTerminalSessionService implements TerminalSessionService {
     public DefaultTerminalSessionService(
             TerminalSessionRepository terminalSessionRepository,
             TerminalRuntime terminalRuntime,
-            TerminalProperties properties
+            TerminalProperties properties,
+            ContainerManagementService containerManagementService
     ) {
         this.terminalSessionRepository = terminalSessionRepository;
         this.terminalRuntime = terminalRuntime;
         this.properties = properties;
+        this.containerManagementService = containerManagementService;
     }
 
     @PostConstruct
@@ -88,6 +92,7 @@ public class DefaultTerminalSessionService implements TerminalSessionService {
         if (terminalSession == null || terminalSession.isClosed()) {
             return;
         }
+        containerManagementService.markActivity(terminalSession.getContainerName());
         terminalSession.write(payload);
     }
 
