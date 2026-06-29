@@ -29,6 +29,7 @@ backend/target/
 backend/build/
 backend/.gradle/
 backend/data/
+backend/src/main/resources/static/assets/
 
 # Java
 *.class

@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
@@ -56,11 +57,17 @@ public class ContainerStatsService {
                     active.set(false);
                 } catch (Exception exception) {
                     active.set(false);
+                    if (isClientDisconnect(exception)) {
+                        log.debug("Container stats stream closed by client. containerName={}", containerName);
+                        return;
+                    }
                     log.warn("Failed to stream container stats. containerName={}", containerName, exception);
                     emitter.completeWithError(exception);
                 }
             }
-            emitter.complete();
+            if (active.get()) {
+                emitter.complete();
+            }
         });
 
         return emitter;
@@ -145,6 +152,21 @@ public class ContainerStatsService {
             return number / 1024.0 / 1024.0;
         }
         return number;
+    }
+
+    private boolean isClientDisconnect(Exception exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof AsyncRequestNotUsableException) {
+                return true;
+            }
+            String message = current.getMessage();
+            if (message != null && message.toLowerCase(Locale.ROOT).contains("broken pipe")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private record CommandResult(int exitCode, String stdout, String stderr) {
