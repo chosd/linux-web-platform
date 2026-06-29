@@ -39,9 +39,38 @@ public class ContainerMetadataRepository {
     public synchronized void save(ContainerRecord containerRecord) throws IOException {
         List<ContainerRecord> containers = new ArrayList<>(readUserContainers(containerRecord.userId()));
         containers.add(containerRecord);
-        Files.createDirectories(storageDir);
-        objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValue(userFile(containerRecord.userId()).toFile(), containers);
+        writeUserContainers(containerRecord.userId(), containers);
+    }
+
+    public synchronized ContainerRecord updateDisplayName(
+            String userId,
+            String containerName,
+            String displayName
+    ) throws IOException {
+        List<ContainerRecord> containers = new ArrayList<>(readUserContainers(userId));
+        for (int index = 0; index < containers.size(); index++) {
+            ContainerRecord container = containers.get(index);
+            if (container.containerName().equals(containerName)) {
+                ContainerRecord updated = new ContainerRecord(
+                        container.userId(),
+                        container.containerName(),
+                        displayName,
+                        container.createdAt());
+                containers.set(index, updated);
+                writeUserContainers(userId, containers);
+                return updated;
+            }
+        }
+        throw new IOException("Container not found. userId=%s containerName=%s".formatted(userId, containerName));
+    }
+
+    public synchronized boolean deleteByUserIdAndContainerName(String userId, String containerName) throws IOException {
+        List<ContainerRecord> containers = new ArrayList<>(readUserContainers(userId));
+        boolean removed = containers.removeIf(container -> container.containerName().equals(containerName));
+        if (removed) {
+            writeUserContainers(userId, containers);
+        }
+        return removed;
     }
 
     private List<ContainerRecord> readUserContainers(String userId) throws IOException {
@@ -58,5 +87,11 @@ public class ContainerMetadataRepository {
             fileName = "anonymous";
         }
         return storageDir.resolve(fileName + ".json");
+    }
+
+    private void writeUserContainers(String userId, List<ContainerRecord> containers) throws IOException {
+        Files.createDirectories(storageDir);
+        objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValue(userFile(userId).toFile(), containers);
     }
 }

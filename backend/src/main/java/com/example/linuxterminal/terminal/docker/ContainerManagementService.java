@@ -122,6 +122,29 @@ public class ContainerManagementService {
         return toContainerInfo(containerRecord, "RUNNING", "restarted");
     }
 
+    public ContainerInfo updateContainer(String userId, String containerName, String displayName) throws IOException {
+        ContainerRecord containerRecord = findOwnedContainer(userId, containerName);
+        ContainerRecord updatedContainerRecord = containerMetadataRepository.updateDisplayName(
+                containerRecord.userId(),
+                containerRecord.containerName(),
+                normalizeDisplayName(displayName));
+        markActivity(updatedContainerRecord.containerName());
+        return toContainerInfo(updatedContainerRecord, statusOf(updatedContainerRecord.containerName()), "updated");
+    }
+
+    public void deleteContainer(String userId, String containerName) throws IOException {
+        ContainerRecord containerRecord = findOwnedContainer(userId, containerName);
+        String status = inspectStatus(containerRecord.containerName());
+        if (status != null) {
+            run(dockerCommandFactory.removeCommand(containerRecord.containerName()));
+        }
+        containerMetadataRepository.deleteByUserIdAndContainerName(
+                containerRecord.userId(),
+                containerRecord.containerName());
+        connectedContainerNames.remove(containerRecord.containerName());
+        lastActivityByContainerName.remove(containerRecord.containerName());
+    }
+
     public void markConnected(String containerName) {
         connectedContainerNames.add(containerName);
         markActivity(containerName);

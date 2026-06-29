@@ -68,4 +68,8 @@ public class DockerCommandFactory {
         return List.of(properties.getDocker().getExecutable(), "restart", containerName);
     }
 
+    public List<String> removeCommand(String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "rm", "-f", containerName);
+    }
+
 }
