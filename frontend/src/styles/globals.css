@@ -1,7 +1,24 @@
 :root {
-  color: #e7edf3;
-  background: #1a1f24;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-bg: #161b20;
+  --color-surface: #202832;
+  --color-surface-strong: #26323d;
+  --color-terminal: #101418;
+  --color-border: #344352;
+  --color-border-strong: #4c6478;
+  --color-text: #e7edf3;
+  --color-text-strong: #f4f7fa;
+  --color-text-muted: #b9c6d1;
+  --color-text-subtle: #8ea0af;
+  --color-primary: #2f6fed;
+  --color-primary-border: #5f91ff;
+  --color-danger-bg: #53272a;
+  --color-danger-border: #7d3d42;
+  --color-danger-text: #ffccd1;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-sans);
 }
 
 * {
@@ -17,25 +34,29 @@ body,
   overflow: hidden;
 }
 
-button {
-  border: 1px solid #4c6478;
+.button {
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  background: #26323d;
-  color: #f4f7fa;
+  background: var(--color-surface-strong);
+  color: var(--color-text-strong);
   cursor: pointer;
   font: inherit;
   min-height: 36px;
   padding: 0 14px;
 }
 
-button:disabled {
+.button:disabled {
   cursor: wait;
   opacity: 0.55;
 }
 
-.primary-button {
-  background: #2f6fed;
-  border-color: #5f91ff;
+.button-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary-border);
+}
+
+.page-title-group {
+  min-width: 0;
 }
 
 .dashboard-page {
@@ -48,8 +69,8 @@ button:disabled {
 
 .dashboard-header {
   align-items: center;
-  background: #202832;
-  border-bottom: 1px solid #344352;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 16px;
   justify-content: space-between;
@@ -63,16 +84,16 @@ button:disabled {
 }
 
 .dashboard-header p {
-  color: #b9c6d1;
+  color: var(--color-text-muted);
   font-size: 13px;
   line-height: 1.4;
   margin: 0;
 }
 
 .error-banner {
-  background: #53272a;
-  border-bottom: 1px solid #7d3d42;
-  color: #ffccd1;
+  background: var(--color-danger-bg);
+  border-bottom: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
   padding: 10px 18px;
 }
 
@@ -87,8 +108,8 @@ button:disabled {
 
 .container-card,
 .empty-state {
-  background: #202832;
-  border: 1px solid #344352;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 
@@ -105,31 +126,47 @@ button:disabled {
   display: flex;
   gap: 10px;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .container-card h2 {
   font-size: 16px;
   line-height: 1.25;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.container-status {
+.status-badge {
   border-radius: 999px;
+  display: inline-flex;
   flex: 0 0 auto;
   font-size: 11px;
   line-height: 1;
   padding: 5px 8px;
 }
 
-.status-running {
+.status-running,
+.status-connected {
   background: #173f32;
   color: #79e2b0;
 }
 
 .status-exited,
-.status-not_found {
+.status-not_found,
+.status-disconnected {
   background: #413946;
   color: #d8c6df;
+}
+
+.status-connecting {
+  background: #5a4a1d;
+  color: #ffe08a;
+}
+
+.status-error {
+  background: var(--color-danger-bg);
+  color: #ffb7bd;
 }
 
 .container-card dl {
@@ -139,26 +176,26 @@ button:disabled {
 }
 
 .container-card dt {
-  color: #8ea0af;
+  color: var(--color-text-subtle);
   font-size: 11px;
   margin-bottom: 3px;
   text-transform: uppercase;
 }
 
 .container-card dd {
-  color: #e7edf3;
-  font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  color: var(--color-text);
+  font-family: var(--font-mono);
   font-size: 12px;
   margin: 0;
   overflow-wrap: anywhere;
 }
 
-.container-card button {
+.container-card .button {
   margin-top: auto;
 }
 
 .empty-state {
-  color: #b9c6d1;
+  color: var(--color-text-muted);
   grid-column: 1 / -1;
   padding: 28px;
   text-align: center;
@@ -176,8 +213,8 @@ button:disabled {
 }
 
 .modal-panel {
-  background: #202832;
-  border: 1px solid #4c6478;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   display: grid;
   gap: 14px;
@@ -205,10 +242,10 @@ button:disabled {
 }
 
 .modal-panel input {
-  background: #101820;
-  border: 1px solid #4c6478;
+  background: var(--color-terminal);
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  color: #f4f7fa;
+  color: var(--color-text-strong);
   font: inherit;
   min-height: 38px;
   padding: 0 10px;
@@ -224,8 +261,8 @@ button:disabled {
 
 .terminal-toolbar {
   align-items: center;
-  background: #202832;
-  border-bottom: 1px solid #344352;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 16px;
   justify-content: space-between;
@@ -240,9 +277,10 @@ button:disabled {
 }
 
 .terminal-subtitle {
-  color: #b9c6d1;
+  color: var(--color-text-muted);
   font-size: 13px;
   margin-bottom: 6px;
+  overflow-wrap: anywhere;
 }
 
 .terminal-actions {
@@ -257,38 +295,10 @@ button:disabled {
   gap: 8px;
 }
 
-.status {
-  border-radius: 999px;
-  display: inline-flex;
-  font-size: 12px;
-  line-height: 1;
-  padding: 5px 8px;
-}
-
 .status-message {
-  color: #b9c6d1;
+  color: var(--color-text-muted);
   font-size: 13px;
   line-height: 1.35;
-}
-
-.status-connecting {
-  background: #5a4a1d;
-  color: #ffe08a;
-}
-
-.status-connected {
-  background: #173f32;
-  color: #79e2b0;
-}
-
-.status-disconnected {
-  background: #413946;
-  color: #d8c6df;
-}
-
-.status-error {
-  background: #53272a;
-  color: #ffb7bd;
 }
 
 .terminal-workspace {
@@ -308,8 +318,8 @@ button:disabled {
 }
 
 .terminal-host {
-  background: #101418;
-  border: 1px solid #344352;
+  background: var(--color-terminal);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   height: 100%;
   min-height: 0;
@@ -319,8 +329,8 @@ button:disabled {
 }
 
 .usage-panel {
-  background: #202832;
-  border: 1px solid #344352;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   color: #d6dee6;
   min-height: 0;
@@ -329,7 +339,7 @@ button:disabled {
 }
 
 .usage-panel h2 {
-  color: #f4f7fa;
+  color: var(--color-text-strong);
   font-size: 13px;
   line-height: 1.2;
   margin: 0 0 10px;
@@ -352,11 +362,11 @@ button:disabled {
 
 .usage-panel code {
   background: #111820;
-  border: 1px solid #344352;
+  border: 1px solid var(--color-border);
   border-radius: 5px;
   color: #dfe7ee;
   display: block;
-  font-family: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   margin-top: 8px;
   padding: 7px 8px;
@@ -384,9 +394,9 @@ button:disabled {
     flex-direction: column;
   }
 
-  .terminal-toolbar button,
+  .terminal-toolbar .button,
   .terminal-actions,
-  .dashboard-header button {
+  .dashboard-header .button {
     width: 100%;
   }
 

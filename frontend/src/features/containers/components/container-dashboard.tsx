@@ -1,5 +1,9 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 
+import { containerApiBaseUrl, userId } from '/src/features/containers/config/container-api';
+import { Button } from '/src/shared/components/button';
+import { StatusBadge } from '/src/shared/components/status-badge';
+
 export type ContainerStatus = 'RUNNING' | 'EXITED' | 'NOT_FOUND' | string;
 
 export type ContainerSummary = {
@@ -13,9 +17,6 @@ type ContainerDashboardProps = {
   onConnectTerminal: (containerName: string, displayName: string) => void;
 };
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:8080`;
-const userId = import.meta.env.VITE_USER_ID || 'anonymous';
-
 export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProps) {
   const [containers, setContainers] = useState<ContainerSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +29,7 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const response = await fetch(`${apiBaseUrl}/api/containers/list`, {
+      const response = await fetch(`${containerApiBaseUrl}/api/containers/list`, {
         headers: {
           'X-User-Id': userId
         }
@@ -59,7 +60,7 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
     setIsCreating(true);
     setErrorMessage('');
     try {
-      const response = await fetch(`${apiBaseUrl}/api/containers/create`, {
+      const response = await fetch(`${containerApiBaseUrl}/api/containers/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,13 +85,13 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
   return (
     <main className="dashboard-page">
       <header className="dashboard-header">
-        <div>
+        <div className="page-title-group">
           <h1>Linux Containers</h1>
           <p>Choose a saved learning container or create a new terminal workspace.</p>
         </div>
-        <button type="button" className="primary-button" onClick={() => setIsModalOpen(true)}>
+        <Button type="button" variant="primary" onClick={() => setIsModalOpen(true)}>
           + 새 컨테이너 만들기
-        </button>
+        </Button>
       </header>
 
       {errorMessage && <div className="error-banner">{errorMessage}</div>}
@@ -105,9 +106,7 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
             <article className="container-card" key={container.containerName}>
               <div className="container-card-header">
                 <h2>{container.displayName}</h2>
-                <span className={`container-status status-${container.status.toLowerCase()}`}>
-                  {container.status}
-                </span>
+                <StatusBadge label={container.status} />
               </div>
               <dl>
                 <div>
@@ -119,12 +118,12 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
                   <dd>{new Date(container.createdAt).toLocaleString()}</dd>
                 </div>
               </dl>
-              <button
+              <Button
                 type="button"
                 onClick={() => onConnectTerminal(container.containerName, container.displayName)}
               >
                 터미널 접속
-              </button>
+              </Button>
             </article>
           ))
         )}
@@ -135,9 +134,9 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
           <form className="modal-panel" onSubmit={createContainer}>
             <header>
               <h2>새 컨테이너 만들기</h2>
-              <button type="button" aria-label="Close" onClick={() => setIsModalOpen(false)}>
+              <Button type="button" aria-label="Close" onClick={() => setIsModalOpen(false)}>
                 x
-              </button>
+              </Button>
             </header>
             <label htmlFor="container-display-name">터미널 이름</label>
             <input
@@ -148,12 +147,12 @@ export function ContainerDashboard({ onConnectTerminal }: ContainerDashboardProp
               autoFocus
             />
             <footer>
-              <button type="button" onClick={() => setIsModalOpen(false)}>
+              <Button type="button" onClick={() => setIsModalOpen(false)}>
                 취소
-              </button>
-              <button type="submit" className="primary-button" disabled={isCreating || !displayName.trim()}>
+              </Button>
+              <Button type="submit" variant="primary" disabled={isCreating || !displayName.trim()}>
                 생성
-              </button>
+              </Button>
             </footer>
           </form>
         </div>

@@ -1,39 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { Terminal } from '@xterm/xterm';
 import '@xterm/xterm/css/xterm.css';
 
-type ConnectionStatus = 'Connecting' | 'Connected' | 'Disconnected' | 'Error';
-
-const defaultWsUrl = `ws://${window.location.hostname}:8080/ws/terminal`;
-const userId = import.meta.env.VITE_USER_ID || 'anonymous';
-const welcomeMessage = [
-  'Linux Terminal Playground',
-  'Commands run inside an isolated Ubuntu Docker container.',
-  'Account: student',
-  'Prompt: student@linux-terminal:~$',
-  'Try: pwd, whoami, ls -al, mkdir test, cd test, echo hello',
-  ''
-];
-
-function messageForClose(event: CloseEvent) {
-  if (event.reason.includes('Docker could not start')) {
-    return 'Docker could not start the terminal container. Build the image and check Docker daemon access.';
-  }
-  if (event.reason.includes('Terminal server could not start Docker')) {
-    return 'The terminal server could not start Docker. Check Docker daemon access on the backend host.';
-  }
-  if (event.reason.includes('Idle timeout')) {
-    return 'Idle timeout reached. Reconnect to start a new terminal.';
-  }
-  if (event.reason.includes('container process exited')) {
-    return event.code === 1000 ? 'Terminal session ended.' : 'Terminal process exited unexpectedly.';
-  }
-  if (event.reason) {
-    return event.reason;
-  }
-  return 'Connection closed.';
-}
+import {
+  ConnectionStatus,
+  defaultTerminalWsUrl,
+  terminalUserId,
+  welcomeMessage
+} from '/src/features/terminal/config/terminal-config';
+import { messageForClose } from '/src/features/terminal/lib/terminal-close-message';
+import { Button } from '/src/shared/components/button';
+import { StatusBadge } from '/src/shared/components/status-badge';
 
 type TerminalViewProps = {
   containerName: string;
@@ -78,8 +56,10 @@ export function TerminalView({ containerName, displayName, onBack }: TerminalVie
       return;
     }
 
-    const baseWsUrl = import.meta.env.VITE_TERMINAL_WS_URL || defaultWsUrl;
-    const wsUrl = `${baseWsUrl}?userId=${encodeURIComponent(userId)}&containerName=${encodeURIComponent(containerName)}`;
+    const baseWsUrl = import.meta.env.VITE_TERMINAL_WS_URL || defaultTerminalWsUrl;
+    const wsUrl = `${baseWsUrl}?userId=${encodeURIComponent(terminalUserId)}&containerName=${encodeURIComponent(
+      containerName
+    )}`;
     const connectionId = connectionIdRef.current;
     setStatus('Connecting');
     setStatusMessage(`Connecting to ${displayName}`);
@@ -190,19 +170,21 @@ export function TerminalView({ containerName, displayName, onBack }: TerminalVie
   return (
     <main className="terminal-page">
       <header className="terminal-toolbar">
-        <div>
+        <div className="page-title-group">
           <h1>Linux Terminal Playground</h1>
           <div className="terminal-subtitle">{displayName}</div>
           <div className="connection-row">
-            <span className={`status status-${status.toLowerCase()}`}>{status}</span>
+            <StatusBadge label={status} />
             <span className="status-message">{statusMessage}</span>
           </div>
         </div>
         <div className="terminal-actions">
-          <button type="button" onClick={onBack}>Dashboard</button>
-          <button type="button" onClick={connect} disabled={status === 'Connecting'}>
+          <Button type="button" onClick={onBack}>
+            Dashboard
+          </Button>
+          <Button type="button" onClick={connect} disabled={status === 'Connecting'}>
             Reconnect
-          </button>
+          </Button>
         </div>
       </header>
       <div className="terminal-workspace">
