@@ -8,7 +8,25 @@ export type ContainerSummary = {
   displayName: string;
   status: ContainerStatus;
   createdAt: string;
+  cpuCores?: number;
+  memoryMb?: number;
   action?: string;
+};
+
+export type ResourceLimitsPayload = {
+  cpuCores: number;
+  memoryMb: number;
+};
+
+export type ContainerStatsSample = {
+  timestamp: string;
+  cpuPercent: number;
+  memoryUsageMb: number;
+  memoryLimitMb: number;
+  networkRxMb: number;
+  networkTxMb: number;
+  blockReadMb: number;
+  blockWriteMb: number;
 };
 
 const jsonHeaders = {
@@ -37,20 +55,24 @@ export async function listContainers() {
   return (await response.json()) as ContainerSummary[];
 }
 
-export async function createContainer(displayName: string) {
+export async function createContainer(displayName: string, rootPassword: string, resourceLimits: ResourceLimitsPayload) {
   const response = await fetch(`${containerApiBaseUrl}/api/containers`, {
     method: 'POST',
     headers: jsonHeaders,
-    body: JSON.stringify({ displayName })
+    body: JSON.stringify({ displayName, rootPassword, resourceLimits })
   });
   return parseContainerResponse(response, 'Container create request failed');
 }
 
-export async function updateContainer(containerName: string, displayName: string) {
+export async function updateContainer(
+  containerName: string,
+  displayName: string,
+  resourceLimits: ResourceLimitsPayload
+) {
   const response = await fetch(`${containerApiBaseUrl}/api/containers/${encodeURIComponent(containerName)}`, {
     method: 'PATCH',
     headers: jsonHeaders,
-    body: JSON.stringify({ displayName })
+    body: JSON.stringify({ displayName, resourceLimits })
   });
   return parseContainerResponse(response, 'Container update request failed');
 }

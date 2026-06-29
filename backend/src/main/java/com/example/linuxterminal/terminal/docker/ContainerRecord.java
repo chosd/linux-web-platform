@@ -6,6 +6,8 @@ public record ContainerRecord(
         String userId,
         String containerName,
         String displayName,
-        Instant createdAt
+        Instant createdAt,
+        Double cpuCores,
+        Integer memoryMb
 ) {
 }

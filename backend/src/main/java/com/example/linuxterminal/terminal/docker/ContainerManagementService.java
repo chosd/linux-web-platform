@@ -36,7 +36,7 @@ public class ContainerManagementService {
         String normalizedUserId = normalizeUserId(userId);
         List<ContainerRecord> containers = containerMetadataRepository.findByUserId(normalizedUserId);
         if (containers.isEmpty()) {
-            return createContainer(normalizedUserId, "Default Terminal");
+            return createContainer(normalizedUserId, "Default Terminal", null, null);
         }
         return startContainer(normalizedUserId, containers.getFirst().containerName());
     }
@@ -51,16 +51,29 @@ public class ContainerManagementService {
     }
 
     public ContainerInfo createContainer(String userId, String displayName) throws IOException {
+        return createContainer(userId, displayName, null, null);
+    }
+
+    public ContainerInfo createContainer(
+            String userId,
+            String displayName,
+            ResourceLimits requestedResourceLimits,
+            String rootPassword
+    ) throws IOException {
         String normalizedUserId = normalizeUserId(userId);
         String containerName = UUID.randomUUID().toString().replace("-", "") + "_container";
         String normalizedDisplayName = normalizeDisplayName(displayName);
+        ResourceLimits resourceLimits = normalizeResourceLimits(requestedResourceLimits);
         ContainerRecord containerRecord = new ContainerRecord(
                 normalizedUserId,
                 containerName,
                 normalizedDisplayName,
-                Instant.now());
+                Instant.now(),
+                resourceLimits.cpuCores(),
+                resourceLimits.memoryMb());
 
-        run(dockerCommandFactory.runDetachedCommand(containerName));
+        run(dockerCommandFactory.runDetachedCommand(containerName, resourceLimits));
+        applyRootPasswordIfPresent(containerName, rootPassword);
         containerMetadataRepository.save(containerRecord);
         markActivity(containerName);
         return toContainerInfo(containerRecord, "RUNNING", "created");
@@ -70,7 +83,7 @@ public class ContainerManagementService {
         ContainerRecord containerRecord = findOwnedContainer(userId, containerName);
         String status = inspectStatus(containerRecord.containerName());
         if (status == null) {
-            run(dockerCommandFactory.runDetachedCommand(containerRecord.containerName()));
+            run(dockerCommandFactory.runDetachedCommand(containerRecord.containerName(), limitsOf(containerRecord)));
             markActivity(containerRecord.containerName());
             return toContainerInfo(containerRecord, "RUNNING", "created");
         }
@@ -123,11 +136,28 @@ public class ContainerManagementService {
     }
 
     public ContainerInfo updateContainer(String userId, String containerName, String displayName) throws IOException {
+        return updateContainer(userId, containerName, displayName, null);
+    }
+
+    public ContainerInfo updateContainer(
+            String userId,
+            String containerName,
+            String displayName,
+            ResourceLimits requestedResourceLimits
+    ) throws IOException {
         ContainerRecord containerRecord = findOwnedContainer(userId, containerName);
-        ContainerRecord updatedContainerRecord = containerMetadataRepository.updateDisplayName(
+        ResourceLimits resourceLimits = normalizeResourceLimits(requestedResourceLimits == null
+                ? limitsOf(containerRecord)
+                : requestedResourceLimits);
+        String status = inspectStatus(containerRecord.containerName());
+        if (status != null) {
+            run(dockerCommandFactory.updateResourceLimitsCommand(containerRecord.containerName(), resourceLimits));
+        }
+        ContainerRecord updatedContainerRecord = containerMetadataRepository.updateContainer(
                 containerRecord.userId(),
                 containerRecord.containerName(),
-                normalizeDisplayName(displayName));
+                normalizeDisplayName(displayName),
+                resourceLimits);
         markActivity(updatedContainerRecord.containerName());
         return toContainerInfo(updatedContainerRecord, statusOf(updatedContainerRecord.containerName()), "updated");
     }
@@ -181,6 +211,8 @@ public class ContainerManagementService {
                         null,
                         "EXITED",
                         null,
+                        null,
+                        null,
                         "stopped");
                 if ("stopped".equals(info.action()) || "already_stopped".equals(info.action())) {
                     stoppedContainers.add(info);
@@ -197,6 +229,10 @@ public class ContainerManagementService {
         return startContainer(userId, containerName);
     }
 
+    public void verifyContainerOwnership(String userId, String containerName) throws IOException {
+        findOwnedContainer(userId, containerName);
+    }
+
     private String inspectStatus(String containerName) throws IOException {
         CommandResult result = runAllowingFailure(dockerCommandFactory.inspectStatusCommand(containerName));
         if (result.exitCode() != 0) {
@@ -211,6 +247,24 @@ public class ContainerManagementService {
         if (result.exitCode() != 0) {
             throw new IOException("Docker command failed. command=%s exitCode=%d stderr=%s"
                     .formatted(command, result.exitCode(), result.stderr()));
+        }
+    }
+
+    private void runWithInput(List<String> command, String input) throws IOException {
+        try {
+            Process process = new ProcessBuilder(command).start();
+            process.getOutputStream().write(input.getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().flush();
+            process.getOutputStream().close();
+            byte[] stderr = process.getErrorStream().readAllBytes();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IOException("Docker command failed. command=%s exitCode=%d stderr=%s"
+                        .formatted(command, exitCode, new String(stderr, StandardCharsets.UTF_8)));
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while running Docker command: " + command, exception);
         }
     }
 
@@ -244,6 +298,34 @@ public class ContainerManagementService {
         return displayName.trim();
     }
 
+    private ResourceLimits normalizeResourceLimits(ResourceLimits resourceLimits) throws IOException {
+        double cpuCores = resourceLimits == null || resourceLimits.cpuCores() == null ? 0.5 : resourceLimits.cpuCores();
+        int memoryMb = resourceLimits == null || resourceLimits.memoryMb() == null ? 256 : resourceLimits.memoryMb();
+        if (cpuCores < 0.1 || cpuCores > 4.0) {
+            throw new IOException("CPU limit must be between 0.1 and 4.0 cores.");
+        }
+        if (memoryMb < 128 || memoryMb > 4096) {
+            throw new IOException("Memory limit must be between 128MB and 4096MB.");
+        }
+        return new ResourceLimits(cpuCores, memoryMb);
+    }
+
+    private ResourceLimits limitsOf(ContainerRecord containerRecord) {
+        return new ResourceLimits(
+                containerRecord.cpuCores() == null ? 0.5 : containerRecord.cpuCores(),
+                containerRecord.memoryMb() == null ? 256 : containerRecord.memoryMb());
+    }
+
+    private void applyRootPasswordIfPresent(String containerName, String rootPassword) throws IOException {
+        if (rootPassword == null || rootPassword.isBlank()) {
+            return;
+        }
+        if (rootPassword.length() < 8) {
+            throw new IOException("Root password must be at least 8 characters.");
+        }
+        runWithInput(dockerCommandFactory.setRootPasswordCommand(containerName), "root:" + rootPassword + "\n");
+    }
+
     private ContainerRecord findOwnedContainer(String userId, String containerName) throws IOException {
         String normalizedUserId = normalizeUserId(userId);
         return containerMetadataRepository.findByUserIdAndContainerName(normalizedUserId, containerName)
@@ -270,6 +352,8 @@ public class ContainerManagementService {
                 containerRecord.displayName(),
                 status,
                 containerRecord.createdAt(),
+                containerRecord.cpuCores(),
+                containerRecord.memoryMb(),
                 action);
     }
 
@@ -279,6 +363,8 @@ public class ContainerManagementService {
             String displayName,
             String status,
             Instant createdAt,
+            Double cpuCores,
+            Integer memoryMb,
             String action
     ) {
     }

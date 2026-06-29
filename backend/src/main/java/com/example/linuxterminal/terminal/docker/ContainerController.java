@@ -1,6 +1,10 @@
 package com.example.linuxterminal.terminal.docker;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +52,11 @@ public class ContainerController {
             @Valid @RequestBody CreateContainerRequest request
     ) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(containerManagementService.createContainer(resolveUserId(userId), request.displayName()));
+                .body(containerManagementService.createContainer(
+                        resolveUserId(userId),
+                        request.displayName(),
+                        request.toResourceLimits(),
+                        request.rootPassword()));
     }
 
     @PostMapping
@@ -57,7 +65,11 @@ public class ContainerController {
             @Valid @RequestBody CreateContainerRequest request
     ) throws IOException {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(containerManagementService.createContainer(resolveUserId(userId), request.displayName()));
+                .body(containerManagementService.createContainer(
+                        resolveUserId(userId),
+                        request.displayName(),
+                        request.toResourceLimits(),
+                        request.rootPassword()));
     }
 
     @PatchMapping("/{containerName}")
@@ -69,7 +81,8 @@ public class ContainerController {
         return ResponseEntity.ok(containerManagementService.updateContainer(
                 resolveUserId(userId),
                 containerName,
-                request.displayName()));
+                request.displayName(),
+                request.toResourceLimits()));
     }
 
     @DeleteMapping("/{containerName}")
@@ -120,12 +133,34 @@ public class ContainerController {
         return "anonymous";
     }
 
-    public record CreateContainerRequest(@NotBlank String displayName) {
+    public record CreateContainerRequest(
+            @NotBlank String displayName,
+            String rootPassword,
+            @Valid ResourceLimitsRequest resourceLimits
+    ) {
+        ResourceLimits toResourceLimits() {
+            return resourceLimits == null ? null : resourceLimits.toResourceLimits();
+        }
     }
 
-    public record UpdateContainerRequest(@NotBlank String displayName) {
+    public record UpdateContainerRequest(
+            @NotBlank String displayName,
+            @Valid ResourceLimitsRequest resourceLimits
+    ) {
+        ResourceLimits toResourceLimits() {
+            return resourceLimits == null ? null : resourceLimits.toResourceLimits();
+        }
     }
 
     public record ContainerRequest(String userId, @NotBlank String containerName) {
+    }
+
+    public record ResourceLimitsRequest(
+            @DecimalMin("0.1") @DecimalMax("4.0") Double cpuCores,
+            @Min(128) @Max(4096) Integer memoryMb
+    ) {
+        ResourceLimits toResourceLimits() {
+            return new ResourceLimits(cpuCores, memoryMb);
+        }
     }
 }

@@ -11,7 +11,7 @@ type AppShellProps = {
 const navItems: Array<{ key: AppMenuKey; label: string; description: string }> = [
   {
     key: 'containers',
-    label: '컨테이너',
+    label: '컨테이너 관리',
     description: 'CRUD'
   }
 ];

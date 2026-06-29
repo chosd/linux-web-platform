@@ -55,7 +55,34 @@ public class ContainerMetadataRepository {
                         container.userId(),
                         container.containerName(),
                         displayName,
-                        container.createdAt());
+                        container.createdAt(),
+                        container.cpuCores(),
+                        container.memoryMb());
+                containers.set(index, updated);
+                writeUserContainers(userId, containers);
+                return updated;
+            }
+        }
+        throw new IOException("Container not found. userId=%s containerName=%s".formatted(userId, containerName));
+    }
+
+    public synchronized ContainerRecord updateContainer(
+            String userId,
+            String containerName,
+            String displayName,
+            ResourceLimits resourceLimits
+    ) throws IOException {
+        List<ContainerRecord> containers = new ArrayList<>(readUserContainers(userId));
+        for (int index = 0; index < containers.size(); index++) {
+            ContainerRecord container = containers.get(index);
+            if (container.containerName().equals(containerName)) {
+                ContainerRecord updated = new ContainerRecord(
+                        container.userId(),
+                        container.containerName(),
+                        displayName,
+                        container.createdAt(),
+                        resourceLimits.cpuCores(),
+                        resourceLimits.memoryMb());
                 containers.set(index, updated);
                 writeUserContainers(userId, containers);
                 return updated;
