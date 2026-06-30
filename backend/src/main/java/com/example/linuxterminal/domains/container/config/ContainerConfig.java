@@ -6,7 +6,7 @@ import com.example.linuxterminal.domains.container.service.ContainerStatsService
 import com.example.linuxterminal.domains.container.service.DockerContainerServiceImpl;
 import com.example.linuxterminal.domains.container.repository.FileContainerMetadataRepository;
 import com.example.linuxterminal.domains.container.service.ContainerService;
-import com.example.linuxterminal.domains.network.service.NetworkService;
+import com.example.linuxterminal.domains.network.service.DockerNetworkService;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import com.example.linuxterminal.global.docker.DockerCommandFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,13 +31,13 @@ public class ContainerConfig {
             DockerCommandFactory dockerCommandFactory,
             ContainerNameGenerator containerNameGenerator,
             FileContainerMetadataRepository metadataRepository,
-            NetworkService networkService
+            DockerNetworkService dockerNetworkService
     ) {
         return new DockerContainerServiceImpl(
                 dockerCommandFactory,
                 containerNameGenerator,
                 metadataRepository,
-                networkService);
+                dockerNetworkService);
     }
 
     @Bean

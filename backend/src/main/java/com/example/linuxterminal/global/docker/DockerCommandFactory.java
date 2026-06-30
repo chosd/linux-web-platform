@@ -1,6 +1,7 @@
 package com.example.linuxterminal.global.docker;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import java.util.ArrayList;
@@ -30,6 +31,15 @@ public class DockerCommandFactory {
             ResourceLimits resourceLimits,
             List<PortBinding> portBindings
     ) {
+        return runDetachedCommand(containerName, resourceLimits, portBindings, null);
+    }
+
+    public List<String> runDetachedCommand(
+            String containerName,
+            ResourceLimits resourceLimits,
+            List<PortBinding> portBindings,
+            ContainerNetworkOptions networkOptions
+    ) {
         TerminalProperties.Docker docker = properties.getDocker();
         List<String> command = new ArrayList<>();
         command.add(docker.getExecutable());
@@ -47,7 +57,27 @@ public class DockerCommandFactory {
         command.add("--cpus=" + resourceLimits.cpuCores());
         command.add("--memory=" + resourceLimits.memoryMb() + "m");
         command.add("--pids-limit=" + docker.getPidsLimit());
-        command.add("--network=" + docker.getNetwork());
+        command.add("--network=" + effectiveNetworkName(docker, networkOptions));
+        if (networkOptions != null && networkOptions.hasNetwork() && hasText(networkOptions.networkAlias())) {
+            /*
+             * Docker's embedded DNS works on user-defined bridge networks.
+             * The container name is already resolvable inside that network, and this alias adds a stable service name.
+             *
+             * Example:
+             * - Create DB container with containerName "project1_db_container" and networkAlias "db".
+             * - Create Python app container on the same network.
+             * - The Python app can connect to "db:3306" without knowing the DB container IP.
+             *
+             * Docker-java equivalent:
+             * CreateContainerCmd.withName(containerName)
+             *     .withHostConfig(HostConfig.newHostConfig().withNetworkMode(networkName))
+             *     .withNetworkingConfig(new NetworkingConfig()
+             *         .withEndpointsConfig(Map.of(networkName,
+             *             new EndpointConfig().withAliases("db"))));
+             */
+            command.add("--network-alias");
+            command.add(networkOptions.networkAlias().trim());
+        }
         command.add("--user");
         command.add(docker.getUser());
         command.add("--workdir");
@@ -211,6 +241,17 @@ public class DockerCommandFactory {
 
     private List<PortBinding> safePortBindings(List<PortBinding> portBindings) {
         return portBindings == null ? Collections.emptyList() : portBindings;
+    }
+
+    private String effectiveNetworkName(TerminalProperties.Docker docker, ContainerNetworkOptions networkOptions) {
+        if (networkOptions != null && networkOptions.hasNetwork()) {
+            return networkOptions.networkName().trim();
+        }
+        return docker.getNetwork();
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
 }

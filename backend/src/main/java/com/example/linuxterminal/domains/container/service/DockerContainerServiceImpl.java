@@ -5,8 +5,9 @@ import com.example.linuxterminal.domains.container.dto.ResourceLimits;
 import com.example.linuxterminal.domains.container.service.ContainerService;
 import com.example.linuxterminal.domains.container.service.ContainerService.ContainerInfo;
 import com.example.linuxterminal.domains.container.domain.ContainerRecord;
+import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
-import com.example.linuxterminal.domains.network.service.NetworkService;
+import com.example.linuxterminal.domains.network.service.DockerNetworkService;
 import com.example.linuxterminal.global.docker.DockerCommandFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,7 +26,7 @@ public class DockerContainerServiceImpl implements ContainerService {
     private final DockerCommandFactory dockerCommandFactory;
     private final ContainerNameGenerator containerNameGenerator;
     private final FileContainerMetadataRepository containerMetadataRepository;
-    private final NetworkService networkService;
+    private final DockerNetworkService dockerNetworkService;
     private final ConcurrentHashMap<String, Instant> lastActivityByContainerName = new ConcurrentHashMap<>();
     private final Set<String> connectedContainerNames = ConcurrentHashMap.newKeySet();
 
@@ -33,12 +34,12 @@ public class DockerContainerServiceImpl implements ContainerService {
             DockerCommandFactory dockerCommandFactory,
             ContainerNameGenerator containerNameGenerator,
             FileContainerMetadataRepository containerMetadataRepository,
-            NetworkService networkService
+            DockerNetworkService dockerNetworkService
     ) {
         this.dockerCommandFactory = dockerCommandFactory;
         this.containerNameGenerator = containerNameGenerator;
         this.containerMetadataRepository = containerMetadataRepository;
-        this.networkService = networkService;
+        this.dockerNetworkService = dockerNetworkService;
     }
 
     public ContainerInfo startOrGetContainer(String userId) throws IOException {
@@ -79,12 +80,24 @@ public class DockerContainerServiceImpl implements ContainerService {
             String rootPassword,
             List<PortBinding> portBindings
     ) throws IOException {
+        return createContainer(userId, displayName, requestedResourceLimits, rootPassword, portBindings, null);
+    }
+
+    public ContainerInfo createContainer(
+            String userId,
+            String displayName,
+            ResourceLimits requestedResourceLimits,
+            String rootPassword,
+            List<PortBinding> portBindings,
+            ContainerNetworkOptions networkOptions
+    ) throws IOException {
         String normalizedUserId = normalizeUserId(userId);
         String containerName = UUID.randomUUID().toString().replace("-", "") + "_container";
         String normalizedDisplayName = normalizeDisplayName(displayName);
         ResourceLimits resourceLimits = normalizeResourceLimits(requestedResourceLimits);
         List<PortBinding> normalizedPortBindings = normalizePortBindings(portBindings);
-        networkService.validatePortBindings(normalizedPortBindings);
+        ContainerNetworkOptions normalizedNetworkOptions = normalizeNetworkOptions(networkOptions, normalizedDisplayName);
+        dockerNetworkService.validatePortBindings(normalizedPortBindings);
         ContainerRecord containerRecord = new ContainerRecord(
                 normalizedUserId,
                 containerName,
@@ -93,7 +106,11 @@ public class DockerContainerServiceImpl implements ContainerService {
                 resourceLimits.cpuCores(),
                 resourceLimits.memoryMb());
 
-        run(dockerCommandFactory.runDetachedCommand(containerName, resourceLimits, normalizedPortBindings));
+        run(dockerCommandFactory.runDetachedCommand(
+                containerName,
+                resourceLimits,
+                normalizedPortBindings,
+                normalizedNetworkOptions));
         applyRootPasswordIfPresent(containerName, rootPassword);
         containerMetadataRepository.save(containerRecord);
         markActivity(containerName);
@@ -339,6 +356,42 @@ public class DockerContainerServiceImpl implements ContainerService {
 
     private List<PortBinding> normalizePortBindings(List<PortBinding> portBindings) {
         return portBindings == null ? List.of() : portBindings;
+    }
+
+    private ContainerNetworkOptions normalizeNetworkOptions(
+            ContainerNetworkOptions networkOptions,
+            String normalizedDisplayName
+    ) throws IOException {
+        if (networkOptions == null || !networkOptions.hasNetwork()) {
+            return null;
+        }
+        String networkName = networkOptions.networkName().trim();
+        if (!networkName.matches("[a-zA-Z0-9_.-]{1,63}")) {
+            throw new IOException("Network name may contain only letters, numbers, dot, underscore, and hyphen.");
+        }
+        String networkAlias = networkOptions.networkAlias();
+        if (networkAlias == null || networkAlias.isBlank()) {
+            networkAlias = normalizedDisplayName;
+        }
+        String normalizedAlias = normalizeNetworkAlias(networkAlias);
+        return new ContainerNetworkOptions(networkName, normalizedAlias);
+    }
+
+    private String normalizeNetworkAlias(String value) throws IOException {
+        String normalized = value.trim()
+                .toLowerCase()
+                .replaceAll("[^a-z0-9_.-]+", "-")
+                .replaceAll("^-+|-+$", "");
+        if (normalized.isBlank()) {
+            throw new IOException("Network alias must contain at least one usable character.");
+        }
+        if (normalized.length() > 63) {
+            normalized = normalized.substring(0, 63);
+        }
+        if (!normalized.matches("[a-z0-9][a-z0-9_.-]*")) {
+            throw new IOException("Network alias must start with a letter or number.");
+        }
+        return normalized;
     }
 
     private void applyRootPasswordIfPresent(String containerName, String rootPassword) throws IOException {

@@ -2,6 +2,7 @@ package com.example.linuxterminal.domains.container.controller;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
 import com.example.linuxterminal.domains.container.service.ContainerService;
+import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
@@ -60,7 +61,8 @@ public class ContainerController {
                         request.displayName(),
                         request.toResourceLimits(),
                         request.rootPassword(),
-                        request.toPortBindings()));
+                        request.toPortBindings(),
+                        request.toNetworkOptions()));
     }
 
     @PostMapping
@@ -74,7 +76,8 @@ public class ContainerController {
                         request.displayName(),
                         request.toResourceLimits(),
                         request.rootPassword(),
-                        request.toPortBindings()));
+                        request.toPortBindings(),
+                        request.toNetworkOptions()));
     }
 
     @PatchMapping("/{containerName}")
@@ -142,7 +145,9 @@ public class ContainerController {
             @NotBlank String displayName,
             String rootPassword,
             @Valid ResourceLimitsRequest resourceLimits,
-            @Valid List<PortBinding> portBindings
+            @Valid List<PortBinding> portBindings,
+            String networkName,
+            String networkAlias
     ) {
         ResourceLimits toResourceLimits() {
             return resourceLimits == null ? null : resourceLimits.toResourceLimits();
@@ -150,6 +155,13 @@ public class ContainerController {
 
         List<PortBinding> toPortBindings() {
             return portBindings == null ? List.of() : portBindings;
+        }
+
+        ContainerNetworkOptions toNetworkOptions() {
+            if (networkName == null || networkName.isBlank()) {
+                return null;
+            }
+            return new ContainerNetworkOptions(networkName, networkAlias);
         }
     }
 

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class NetworkService {
+public class DockerNetworkServiceImpl implements DockerNetworkService {
 
     private static final int FIRST_UNPRIVILEGED_PORT = 1024;
     private static final int LAST_PORT = 65535;
@@ -27,11 +27,12 @@ public class NetworkService {
     private final DockerCommandFactory dockerCommandFactory;
     private final ObjectMapper objectMapper;
 
-    public NetworkService(DockerCommandFactory dockerCommandFactory, ObjectMapper objectMapper) {
+    public DockerNetworkServiceImpl(DockerCommandFactory dockerCommandFactory, ObjectMapper objectMapper) {
         this.dockerCommandFactory = dockerCommandFactory;
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public void validatePortBindings(List<PortBinding> portBindings) throws IOException {
         if (portBindings == null || portBindings.isEmpty()) {
             return;
@@ -56,6 +57,7 @@ public class NetworkService {
         }
     }
 
+    @Override
     public List<PortMappingResponse> listPortMappings(String containerName) throws IOException {
         CommandResult result = runAllowingFailure(dockerCommandFactory.containerPortCommand(containerName));
         if (result.exitCode() != 0) {
@@ -68,6 +70,7 @@ public class NetworkService {
                 .toList();
     }
 
+    @Override
     public ContainerNetworkDashboardResponse dashboard(String containerName) throws IOException {
         return new ContainerNetworkDashboardResponse(
                 containerName,
@@ -75,13 +78,24 @@ public class NetworkService {
                 listPortMappings(containerName));
     }
 
-    public NetworkResponse createBridgeNetwork(String networkName) throws IOException {
+    @Override
+    public NetworkResponse createNetwork(String networkName) throws IOException {
         String normalizedName = normalizeNetworkName(networkName);
         CommandResult result = runAllowingFailure(dockerCommandFactory.createBridgeNetworkCommand(normalizedName));
         if (result.exitCode() != 0) {
             throw new IOException("Failed to create Docker network. stderr=" + result.stderr());
         }
         return inspectNetwork(normalizedName);
+    }
+
+    @Override
+    public NetworkResponse connectContainerToNetwork(String containerId, String networkName) throws IOException {
+        return connectContainer(containerId, networkName);
+    }
+
+    @Override
+    public NetworkResponse disconnectContainerFromNetwork(String containerId, String networkName) throws IOException {
+        return disconnectContainer(containerId, networkName);
     }
 
     public NetworkResponse connectContainer(String containerName, String networkName) throws IOException {

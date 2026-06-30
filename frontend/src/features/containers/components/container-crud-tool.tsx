@@ -9,7 +9,6 @@ import {
   updateContainer
 } from '/src/features/containers/lib/container-api-client';
 import { ContainerNetworkDashboardPanel } from '/src/features/containers/components/container-network-dashboard';
-import { ContainerStatsChart } from '/src/features/containers/components/container-stats-chart';
 import {
   areValidPortBindings,
   DraftPortBinding,
@@ -254,11 +253,6 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
 
       {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
-      <ContainerStatsChart
-        containerName={monitoredContainerName}
-        displayName={containers.find((container) => container.containerName === monitoredContainerName)?.displayName}
-      />
-
       <ContainerNetworkDashboardPanel
         containerName={monitoredContainerName}
         displayName={containers.find((container) => container.containerName === monitoredContainerName)?.displayName}
@@ -377,7 +371,7 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
                                 onClick={() => setMonitoredContainerName(container.containerName)}
                                 disabled={isBusy || !isRunning}
                               >
-                                모니터링
+                                네트워크
                               </Button>
                               {isRunning && (
                                 <Button

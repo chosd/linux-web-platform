@@ -1,6 +1,7 @@
 package com.example.linuxterminal.domains.container.service;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
 import java.io.IOException;
 import java.time.Duration;
@@ -28,6 +29,15 @@ public interface ContainerService {
             ResourceLimits requestedResourceLimits,
             String rootPassword,
             List<PortBinding> portBindings
+    ) throws IOException;
+
+    ContainerInfo createContainer(
+            String userId,
+            String displayName,
+            ResourceLimits requestedResourceLimits,
+            String rootPassword,
+            List<PortBinding> portBindings,
+            ContainerNetworkOptions networkOptions
     ) throws IOException;
 
     ContainerInfo startContainer(String userId, String containerName) throws IOException;

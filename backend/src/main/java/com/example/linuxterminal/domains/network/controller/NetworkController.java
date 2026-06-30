@@ -6,7 +6,7 @@ import com.example.linuxterminal.domains.network.dto.ContainerNetworkRequest;
 import com.example.linuxterminal.domains.network.dto.CreateNetworkRequest;
 import com.example.linuxterminal.domains.network.dto.NetworkResponse;
 import com.example.linuxterminal.domains.network.dto.PortMappingResponse;
-import com.example.linuxterminal.domains.network.service.NetworkService;
+import com.example.linuxterminal.domains.network.service.DockerNetworkService;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class NetworkController {
 
-    private final NetworkService networkService;
+    private final DockerNetworkService dockerNetworkService;
     private final ContainerService containerService;
 
-    public NetworkController(NetworkService networkService, ContainerService containerService) {
-        this.networkService = networkService;
+    public NetworkController(DockerNetworkService dockerNetworkService, ContainerService containerService) {
+        this.dockerNetworkService = dockerNetworkService;
         this.containerService = containerService;
     }
 
@@ -41,7 +41,7 @@ public class NetworkController {
             @PathVariable String containerName
     ) throws IOException {
         containerService.verifyContainerOwnership(resolveUserId(userId), containerName);
-        return ResponseEntity.ok(networkService.listPortMappings(containerName));
+        return ResponseEntity.ok(dockerNetworkService.listPortMappings(containerName));
     }
 
     @GetMapping("/containers/{containerName}/network")
@@ -50,13 +50,13 @@ public class NetworkController {
             @PathVariable String containerName
     ) throws IOException {
         containerService.verifyContainerOwnership(resolveUserId(userId), containerName);
-        return ResponseEntity.ok(networkService.dashboard(containerName));
+        return ResponseEntity.ok(dockerNetworkService.dashboard(containerName));
     }
 
     @PostMapping("/networks")
     public ResponseEntity<NetworkResponse> createNetwork(@Valid @RequestBody CreateNetworkRequest request)
             throws IOException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(networkService.createBridgeNetwork(request.name()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(dockerNetworkService.createNetwork(request.name()));
     }
 
     @PostMapping("/containers/{containerName}/networks")
@@ -66,7 +66,7 @@ public class NetworkController {
             @Valid @RequestBody ContainerNetworkRequest request
     ) throws IOException {
         containerService.verifyContainerOwnership(resolveUserId(userId), containerName);
-        return ResponseEntity.ok(networkService.connectContainer(containerName, request.networkName()));
+        return ResponseEntity.ok(dockerNetworkService.connectContainerToNetwork(containerName, request.networkName()));
     }
 
     @DeleteMapping("/containers/{containerName}/networks")
@@ -76,7 +76,7 @@ public class NetworkController {
             @Valid @RequestBody ContainerNetworkRequest request
     ) throws IOException {
         containerService.verifyContainerOwnership(resolveUserId(userId), containerName);
-        return ResponseEntity.ok(networkService.disconnectContainer(containerName, request.networkName()));
+        return ResponseEntity.ok(dockerNetworkService.disconnectContainerFromNetwork(containerName, request.networkName()));
     }
 
     private String resolveUserId(String userId) {
