@@ -2,6 +2,7 @@ package com.example.linuxterminal.domains.container.controller;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
 import com.example.linuxterminal.domains.container.service.ContainerService;
+import com.example.linuxterminal.domains.network.dto.PortBinding;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -58,7 +59,8 @@ public class ContainerController {
                         resolveUserId(userId),
                         request.displayName(),
                         request.toResourceLimits(),
-                        request.rootPassword()));
+                        request.rootPassword(),
+                        request.toPortBindings()));
     }
 
     @PostMapping
@@ -71,7 +73,8 @@ public class ContainerController {
                         resolveUserId(userId),
                         request.displayName(),
                         request.toResourceLimits(),
-                        request.rootPassword()));
+                        request.rootPassword(),
+                        request.toPortBindings()));
     }
 
     @PatchMapping("/{containerName}")
@@ -138,10 +141,15 @@ public class ContainerController {
     public record CreateContainerRequest(
             @NotBlank String displayName,
             String rootPassword,
-            @Valid ResourceLimitsRequest resourceLimits
+            @Valid ResourceLimitsRequest resourceLimits,
+            @Valid List<PortBinding> portBindings
     ) {
         ResourceLimits toResourceLimits() {
             return resourceLimits == null ? null : resourceLimits.toResourceLimits();
+        }
+
+        List<PortBinding> toPortBindings() {
+            return portBindings == null ? List.of() : portBindings;
         }
     }
 

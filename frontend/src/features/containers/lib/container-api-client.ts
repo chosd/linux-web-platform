@@ -18,6 +18,36 @@ export type ResourceLimitsPayload = {
   memoryMb: number;
 };
 
+export type PortProtocol = 'TCP' | 'UDP';
+
+export type PortBindingPayload = {
+  protocol: PortProtocol;
+  hostPort: number;
+  containerPort: number;
+};
+
+export type PortMapping = {
+  hostPort?: number;
+  containerPort?: number;
+  protocol: PortProtocol;
+  hostIp?: string;
+  url?: string;
+};
+
+export type ContainerNetwork = {
+  name: string;
+  networkId: string;
+  ipAddress: string;
+  gateway: string;
+  macAddress: string;
+};
+
+export type ContainerNetworkDashboard = {
+  containerName: string;
+  networks: ContainerNetwork[];
+  ports: PortMapping[];
+};
+
 export type ContainerStatsSample = {
   timestamp: string;
   cpuPercent: number;
@@ -40,9 +70,21 @@ const userHeaders = {
 
 async function parseContainerResponse(response: Response, fallbackMessage: string) {
   if (!response.ok) {
-    throw new Error(`${fallbackMessage}: ${response.status}`);
+    throw new Error(await parseErrorMessage(response, fallbackMessage));
   }
   return (await response.json()) as ContainerSummary;
+}
+
+async function parseErrorMessage(response: Response, fallbackMessage: string) {
+  try {
+    const body = (await response.json()) as { message?: string };
+    if (body.message) {
+      return body.message;
+    }
+  } catch {
+    // Ignore non-JSON error bodies.
+  }
+  return `${fallbackMessage}: ${response.status}`;
 }
 
 export async function listContainers() {
@@ -50,16 +92,21 @@ export async function listContainers() {
     headers: userHeaders
   });
   if (!response.ok) {
-    throw new Error(`Container list request failed: ${response.status}`);
+    throw new Error(await parseErrorMessage(response, 'Container list request failed'));
   }
   return (await response.json()) as ContainerSummary[];
 }
 
-export async function createContainer(displayName: string, rootPassword: string, resourceLimits: ResourceLimitsPayload) {
+export async function createContainer(
+  displayName: string,
+  rootPassword: string,
+  resourceLimits: ResourceLimitsPayload,
+  portBindings: PortBindingPayload[]
+) {
   const response = await fetch(`${containerApiBaseUrl}/api/containers`, {
     method: 'POST',
     headers: jsonHeaders,
-    body: JSON.stringify({ displayName, rootPassword, resourceLimits })
+    body: JSON.stringify({ displayName, rootPassword, resourceLimits, portBindings })
   });
   return parseContainerResponse(response, 'Container create request failed');
 }
@@ -83,7 +130,7 @@ export async function deleteContainer(containerName: string) {
     headers: userHeaders
   });
   if (!response.ok) {
-    throw new Error(`Container delete request failed: ${response.status}`);
+    throw new Error(await parseErrorMessage(response, 'Container delete request failed'));
   }
 }
 
@@ -94,4 +141,17 @@ export async function runContainerAction(action: 'start' | 'stop' | 'restart', c
     body: JSON.stringify({ userId, containerName })
   });
   return parseContainerResponse(response, `Container ${action} request failed`);
+}
+
+export async function getContainerNetworkDashboard(containerName: string) {
+  const response = await fetch(
+    `${containerApiBaseUrl}/api/containers/${encodeURIComponent(containerName)}/network`,
+    {
+      headers: userHeaders
+    }
+  );
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response, 'Container network request failed'));
+  }
+  return (await response.json()) as ContainerNetworkDashboard;
 }

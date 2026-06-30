@@ -5,6 +5,8 @@ import com.example.linuxterminal.domains.container.dto.ResourceLimits;
 import com.example.linuxterminal.domains.container.service.ContainerService;
 import com.example.linuxterminal.domains.container.service.ContainerService.ContainerInfo;
 import com.example.linuxterminal.domains.container.domain.ContainerRecord;
+import com.example.linuxterminal.domains.network.dto.PortBinding;
+import com.example.linuxterminal.domains.network.service.NetworkService;
 import com.example.linuxterminal.global.docker.DockerCommandFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,17 +25,20 @@ public class DockerContainerServiceImpl implements ContainerService {
     private final DockerCommandFactory dockerCommandFactory;
     private final ContainerNameGenerator containerNameGenerator;
     private final FileContainerMetadataRepository containerMetadataRepository;
+    private final NetworkService networkService;
     private final ConcurrentHashMap<String, Instant> lastActivityByContainerName = new ConcurrentHashMap<>();
     private final Set<String> connectedContainerNames = ConcurrentHashMap.newKeySet();
 
     public DockerContainerServiceImpl(
             DockerCommandFactory dockerCommandFactory,
             ContainerNameGenerator containerNameGenerator,
-            FileContainerMetadataRepository containerMetadataRepository
+            FileContainerMetadataRepository containerMetadataRepository,
+            NetworkService networkService
     ) {
         this.dockerCommandFactory = dockerCommandFactory;
         this.containerNameGenerator = containerNameGenerator;
         this.containerMetadataRepository = containerMetadataRepository;
+        this.networkService = networkService;
     }
 
     public ContainerInfo startOrGetContainer(String userId) throws IOException {
@@ -64,10 +69,22 @@ public class DockerContainerServiceImpl implements ContainerService {
             ResourceLimits requestedResourceLimits,
             String rootPassword
     ) throws IOException {
+        return createContainer(userId, displayName, requestedResourceLimits, rootPassword, List.of());
+    }
+
+    public ContainerInfo createContainer(
+            String userId,
+            String displayName,
+            ResourceLimits requestedResourceLimits,
+            String rootPassword,
+            List<PortBinding> portBindings
+    ) throws IOException {
         String normalizedUserId = normalizeUserId(userId);
         String containerName = UUID.randomUUID().toString().replace("-", "") + "_container";
         String normalizedDisplayName = normalizeDisplayName(displayName);
         ResourceLimits resourceLimits = normalizeResourceLimits(requestedResourceLimits);
+        List<PortBinding> normalizedPortBindings = normalizePortBindings(portBindings);
+        networkService.validatePortBindings(normalizedPortBindings);
         ContainerRecord containerRecord = new ContainerRecord(
                 normalizedUserId,
                 containerName,
@@ -76,7 +93,7 @@ public class DockerContainerServiceImpl implements ContainerService {
                 resourceLimits.cpuCores(),
                 resourceLimits.memoryMb());
 
-        run(dockerCommandFactory.runDetachedCommand(containerName, resourceLimits));
+        run(dockerCommandFactory.runDetachedCommand(containerName, resourceLimits, normalizedPortBindings));
         applyRootPasswordIfPresent(containerName, rootPassword);
         containerMetadataRepository.save(containerRecord);
         markActivity(containerName);
@@ -318,6 +335,10 @@ public class DockerContainerServiceImpl implements ContainerService {
         return new ResourceLimits(
                 containerRecord.cpuCores() == null ? 0.5 : containerRecord.cpuCores(),
                 containerRecord.memoryMb() == null ? 256 : containerRecord.memoryMb());
+    }
+
+    private List<PortBinding> normalizePortBindings(List<PortBinding> portBindings) {
+        return portBindings == null ? List.of() : portBindings;
     }
 
     private void applyRootPasswordIfPresent(String containerName, String rootPassword) throws IOException {

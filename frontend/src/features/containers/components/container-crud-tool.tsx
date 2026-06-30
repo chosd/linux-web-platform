@@ -8,7 +8,14 @@ import {
   runContainerAction,
   updateContainer
 } from '/src/features/containers/lib/container-api-client';
+import { ContainerNetworkDashboardPanel } from '/src/features/containers/components/container-network-dashboard';
 import { ContainerStatsChart } from '/src/features/containers/components/container-stats-chart';
+import {
+  areValidPortBindings,
+  DraftPortBinding,
+  PortBindingsEditor,
+  toPortBindingPayload
+} from '/src/features/containers/components/port-bindings-editor';
 import { Button } from '/src/shared/components/button';
 import { StatusBadge } from '/src/shared/components/status-badge';
 
@@ -24,6 +31,7 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
   const [rootPassword, setRootPassword] = useState('');
   const [cpuCores, setCpuCores] = useState('0.5');
   const [memoryMb, setMemoryMb] = useState('256');
+  const [portBindings, setPortBindings] = useState<DraftPortBinding[]>([]);
   const [editingContainerName, setEditingContainerName] = useState<string | null>(null);
   const [editingDisplayName, setEditingDisplayName] = useState('');
   const [editingCpuCores, setEditingCpuCores] = useState('');
@@ -68,7 +76,12 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
     const trimmedDisplayName = displayName.trim();
     const parsedCpuCores = Number(cpuCores);
     const parsedMemoryMb = Number(memoryMb);
-    if (!trimmedDisplayName || !isValidResourceLimits(parsedCpuCores, parsedMemoryMb) || rootPassword.length < 8) {
+    if (
+      !trimmedDisplayName ||
+      !isValidResourceLimits(parsedCpuCores, parsedMemoryMb) ||
+      rootPassword.length < 8 ||
+      !areValidPortBindings(portBindings)
+    ) {
       return;
     }
 
@@ -78,10 +91,11 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
       const createdContainer = await createContainer(trimmedDisplayName, rootPassword, {
         cpuCores: parsedCpuCores,
         memoryMb: parsedMemoryMb
-      });
+      }, toPortBindingPayload(portBindings));
       setContainers((current) => [createdContainer, ...current]);
       setDisplayName('');
       setRootPassword('');
+      setPortBindings([]);
       setMonitoredContainerName(createdContainer.containerName);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to create container.');
@@ -228,17 +242,24 @@ export function ContainerCrudTool({ onConnectTerminal }: ContainerCrudToolProps)
               isCreating ||
               !displayName.trim() ||
               rootPassword.length < 8 ||
-              !isValidResourceLimits(Number(cpuCores), Number(memoryMb))
+              !isValidResourceLimits(Number(cpuCores), Number(memoryMb)) ||
+              !areValidPortBindings(portBindings)
             }
           >
             생성
           </Button>
         </div>
+        <PortBindingsEditor value={portBindings} onChange={setPortBindings} />
       </form>
 
       {errorMessage && <div className="error-banner">{errorMessage}</div>}
 
       <ContainerStatsChart
+        containerName={monitoredContainerName}
+        displayName={containers.find((container) => container.containerName === monitoredContainerName)?.displayName}
+      />
+
+      <ContainerNetworkDashboardPanel
         containerName={monitoredContainerName}
         displayName={containers.find((container) => container.containerName === monitoredContainerName)?.displayName}
       />

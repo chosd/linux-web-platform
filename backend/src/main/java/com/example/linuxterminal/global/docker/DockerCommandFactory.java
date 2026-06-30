@@ -1,8 +1,10 @@
 package com.example.linuxterminal.global.docker;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.network.dto.PortBinding;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DockerCommandFactory {
@@ -20,6 +22,14 @@ public class DockerCommandFactory {
     }
 
     public List<String> runDetachedCommand(String containerName, ResourceLimits resourceLimits) {
+        return runDetachedCommand(containerName, resourceLimits, List.of());
+    }
+
+    public List<String> runDetachedCommand(
+            String containerName,
+            ResourceLimits resourceLimits,
+            List<PortBinding> portBindings
+    ) {
         TerminalProperties.Docker docker = properties.getDocker();
         List<String> command = new ArrayList<>();
         command.add(docker.getExecutable());
@@ -27,6 +37,13 @@ public class DockerCommandFactory {
         command.add("-d");
         command.add("--name");
         command.add(containerName);
+        for (PortBinding portBinding : safePortBindings(portBindings)) {
+            command.add("-p");
+            command.add("%d:%d/%s".formatted(
+                    portBinding.hostPort(),
+                    portBinding.containerPort(),
+                    portBinding.protocol().name().toLowerCase()));
+        }
         command.add("--cpus=" + resourceLimits.cpuCores());
         command.add("--memory=" + resourceLimits.memoryMb() + "m");
         command.add("--pids-limit=" + docker.getPidsLimit());
@@ -40,6 +57,35 @@ public class DockerCommandFactory {
         command.add("-f");
         command.add("/dev/null");
         return command;
+    }
+
+    public List<String> containerPortCommand(String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "port", containerName);
+    }
+
+    public List<String> inspectContainerNetworksCommand(String containerName) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "inspect",
+                "-f",
+                "{{json .NetworkSettings.Networks}}",
+                containerName);
+    }
+
+    public List<String> createBridgeNetworkCommand(String networkName) {
+        return List.of(properties.getDocker().getExecutable(), "network", "create", "--driver", "bridge", networkName);
+    }
+
+    public List<String> connectNetworkCommand(String networkName, String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "network", "connect", networkName, containerName);
+    }
+
+    public List<String> disconnectNetworkCommand(String networkName, String containerName) {
+        return List.of(properties.getDocker().getExecutable(), "network", "disconnect", networkName, containerName);
+    }
+
+    public List<String> inspectNetworkCommand(String networkName) {
+        return List.of(properties.getDocker().getExecutable(), "network", "inspect", networkName);
     }
 
     public List<String> updateResourceLimitsCommand(String containerName, ResourceLimits resourceLimits) {
@@ -161,6 +207,10 @@ public class DockerCommandFactory {
             return (int) Double.parseDouble(normalized.substring(0, normalized.length() - 1));
         }
         return (int) Double.parseDouble(normalized);
+    }
+
+    private List<PortBinding> safePortBindings(List<PortBinding> portBindings) {
+        return portBindings == null ? Collections.emptyList() : portBindings;
     }
 
 }
