@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-export type AppMenuKey = 'containers';
+export type AppMenuKey = 'containers' | 'files';
 
 type AppShellProps = {
   activeMenu: AppMenuKey;
@@ -13,6 +13,11 @@ const navItems: Array<{ key: AppMenuKey; label: string; description: string }> =
     key: 'containers',
     label: '컨테이너 관리',
     description: 'CRUD'
+  },
+  {
+    key: 'files',
+    label: '파일 탐색기',
+    description: 'Upload / Download'
   }
 ];
 

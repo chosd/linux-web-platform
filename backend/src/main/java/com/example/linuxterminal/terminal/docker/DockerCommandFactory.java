@@ -83,6 +83,48 @@ public class DockerCommandFactory {
         return command;
     }
 
+    public List<String> listFilesCommand(String containerName, String containerPath) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "exec",
+                containerName,
+                "find",
+                containerPath,
+                "-mindepth",
+                "1",
+                "-maxdepth",
+                "1",
+                "-printf",
+                "%f\\t%y\\t%s\\t%T@\\n");
+    }
+
+    public List<String> testRegularFileCommand(String containerName, String containerPath) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "exec",
+                containerName,
+                "test",
+                "-f",
+                containerPath);
+    }
+
+    public List<String> readFileCommand(String containerName, String containerPath) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "exec",
+                containerName,
+                "cat",
+                containerPath);
+    }
+
+    public List<String> copyFileToContainerCommand(String sourcePath, String containerName, String containerPath) {
+        return List.of(
+                properties.getDocker().getExecutable(),
+                "cp",
+                sourcePath,
+                containerName + ":" + containerPath);
+    }
+
     public List<String> inspectStatusCommand(String containerName) {
         return List.of(
                 properties.getDocker().getExecutable(),
