@@ -1,6 +1,6 @@
 package com.example.linuxterminal.domains.terminal.config;
 
-import com.example.linuxterminal.domains.terminal.adapter.in.websocket.TerminalWebSocketHandler;
+import com.example.linuxterminal.domains.terminal.controller.TerminalWebSocketHandler;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

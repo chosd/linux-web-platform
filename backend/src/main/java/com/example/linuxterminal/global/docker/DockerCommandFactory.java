@@ -1,6 +1,6 @@
 package com.example.linuxterminal.global.docker;
 
-import com.example.linuxterminal.domains.container.application.dto.ResourceLimits;
+import com.example.linuxterminal.domains.container.dto.ResourceLimits;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,11 @@
 package com.example.linuxterminal.domains.container.config;
 
-import com.example.linuxterminal.domains.container.adapter.out.docker.ContainerCleanUpScheduler;
-import com.example.linuxterminal.domains.container.adapter.out.docker.ContainerNameGenerator;
-import com.example.linuxterminal.domains.container.adapter.out.docker.ContainerStatsService;
-import com.example.linuxterminal.domains.container.adapter.out.docker.DockerContainerServiceImpl;
-import com.example.linuxterminal.domains.container.adapter.out.persistence.FileContainerMetadataRepository;
-import com.example.linuxterminal.domains.container.application.port.in.ContainerService;
+import com.example.linuxterminal.domains.container.service.ContainerCleanUpScheduler;
+import com.example.linuxterminal.domains.container.service.ContainerNameGenerator;
+import com.example.linuxterminal.domains.container.service.ContainerStatsService;
+import com.example.linuxterminal.domains.container.service.DockerContainerServiceImpl;
+import com.example.linuxterminal.domains.container.repository.FileContainerMetadataRepository;
+import com.example.linuxterminal.domains.container.service.ContainerService;
 import com.example.linuxterminal.global.config.TerminalProperties;
 import com.example.linuxterminal.global.docker.DockerCommandFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
