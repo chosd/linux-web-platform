@@ -1,6 +1,6 @@
 package com.example.linuxterminal;
 
-import com.example.linuxterminal.terminal.config.TerminalProperties;
+import com.example.linuxterminal.global.config.TerminalProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
