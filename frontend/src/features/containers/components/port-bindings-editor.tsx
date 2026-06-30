@@ -49,7 +49,9 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
       </div>
 
       {value.length === 0 ? (
-        <div className="empty-inline">포트 포워딩 없음</div>
+        <div className="port-empty-hint">
+          설정된 포트 포워딩이 없습니다. 오른쪽 추가 버튼을 눌러 포트를 연결하세요.
+        </div>
       ) : (
         <div className="port-binding-list">
           {value.map((binding) => {

@@ -35,13 +35,10 @@ export function App() {
           isLoadingHostResources={hostResourceState.isLoading}
           hostResourceErrorMessage={hostResourceState.errorMessage}
           onRefreshHostResources={hostResourceState.reload}
-        />
-      )}
-      {activeMenu === 'containers' && (
-        <ContainerCrudPage
           onConnectTerminal={(containerName, displayName) => setSelectedContainer({ containerName, displayName })}
         />
       )}
+      {activeMenu === 'containers' && <ContainerCrudPage />}
       {activeMenu === 'files' && <FileExplorerPage />}
     </AppShell>
   );

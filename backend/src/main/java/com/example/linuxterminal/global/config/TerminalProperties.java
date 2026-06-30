@@ -92,6 +92,9 @@ public class TerminalProperties {
         @NotBlank
         private String containerNamePrefix = "linux-terminal";
 
+        @NotBlank
+        private String allowedVolumeHostPathBase = "/mnt/storage";
+
         @Positive
         private int containerNameSessionIdLength = 24;
 
@@ -167,6 +170,14 @@ public class TerminalProperties {
             this.containerNamePrefix = containerNamePrefix;
         }
 
+        public String getAllowedVolumeHostPathBase() {
+            return allowedVolumeHostPathBase;
+        }
+
+        public void setAllowedVolumeHostPathBase(String allowedVolumeHostPathBase) {
+            this.allowedVolumeHostPathBase = allowedVolumeHostPathBase;
+        }
+
         public int getContainerNameSessionIdLength() {
             return containerNameSessionIdLength;
         }
@@ -176,4 +187,3 @@ public class TerminalProperties {
         }
     }
 }
-

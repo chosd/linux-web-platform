@@ -1,6 +1,7 @@
 package com.example.linuxterminal.domains.container.controller;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.container.dto.VolumeMount;
 import com.example.linuxterminal.domains.container.service.ContainerService;
 import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
@@ -62,6 +63,7 @@ public class ContainerController {
                         request.toResourceLimits(),
                         request.rootPassword(),
                         request.toPortBindings(),
+                        request.toVolumeMounts(),
                         request.toNetworkOptions()));
     }
 
@@ -77,6 +79,7 @@ public class ContainerController {
                         request.toResourceLimits(),
                         request.rootPassword(),
                         request.toPortBindings(),
+                        request.toVolumeMounts(),
                         request.toNetworkOptions()));
     }
 
@@ -146,6 +149,7 @@ public class ContainerController {
             String rootPassword,
             @Valid ResourceLimitsRequest resourceLimits,
             @Valid List<PortBinding> portBindings,
+            @Valid List<VolumeMount> volumeMounts,
             String networkName,
             String networkAlias
     ) {
@@ -155,6 +159,10 @@ public class ContainerController {
 
         List<PortBinding> toPortBindings() {
             return portBindings == null ? List.of() : portBindings;
+        }
+
+        List<VolumeMount> toVolumeMounts() {
+            return volumeMounts == null ? List.of() : volumeMounts;
         }
 
         ContainerNetworkOptions toNetworkOptions() {

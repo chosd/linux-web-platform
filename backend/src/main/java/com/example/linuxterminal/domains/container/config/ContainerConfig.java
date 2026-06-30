@@ -31,13 +31,15 @@ public class ContainerConfig {
             DockerCommandFactory dockerCommandFactory,
             ContainerNameGenerator containerNameGenerator,
             FileContainerMetadataRepository metadataRepository,
-            DockerNetworkService dockerNetworkService
+            DockerNetworkService dockerNetworkService,
+            TerminalProperties terminalProperties
     ) {
         return new DockerContainerServiceImpl(
                 dockerCommandFactory,
                 containerNameGenerator,
                 metadataRepository,
-                dockerNetworkService);
+                dockerNetworkService,
+                terminalProperties);
     }
 
     @Bean

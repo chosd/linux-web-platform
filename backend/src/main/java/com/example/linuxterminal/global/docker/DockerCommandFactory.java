@@ -1,6 +1,7 @@
 package com.example.linuxterminal.global.docker;
 
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.container.dto.VolumeMount;
 import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
 import com.example.linuxterminal.global.config.TerminalProperties;
@@ -31,13 +32,23 @@ public class DockerCommandFactory {
             ResourceLimits resourceLimits,
             List<PortBinding> portBindings
     ) {
-        return runDetachedCommand(containerName, resourceLimits, portBindings, null);
+        return runDetachedCommand(containerName, resourceLimits, portBindings, List.of(), null);
     }
 
     public List<String> runDetachedCommand(
             String containerName,
             ResourceLimits resourceLimits,
             List<PortBinding> portBindings,
+            ContainerNetworkOptions networkOptions
+    ) {
+        return runDetachedCommand(containerName, resourceLimits, portBindings, List.of(), networkOptions);
+    }
+
+    public List<String> runDetachedCommand(
+            String containerName,
+            ResourceLimits resourceLimits,
+            List<PortBinding> portBindings,
+            List<VolumeMount> volumeMounts,
             ContainerNetworkOptions networkOptions
     ) {
         TerminalProperties.Docker docker = properties.getDocker();
@@ -53,6 +64,10 @@ public class DockerCommandFactory {
                     portBinding.hostPort(),
                     portBinding.containerPort(),
                     portBinding.protocol().name().toLowerCase()));
+        }
+        for (VolumeMount volumeMount : safeVolumeMounts(volumeMounts)) {
+            command.add("-v");
+            command.add("%s:%s".formatted(volumeMount.hostPath(), volumeMount.containerPath()));
         }
         command.add("--cpus=" + resourceLimits.cpuCores());
         command.add("--memory=" + resourceLimits.memoryMb() + "m");
@@ -241,6 +256,10 @@ public class DockerCommandFactory {
 
     private List<PortBinding> safePortBindings(List<PortBinding> portBindings) {
         return portBindings == null ? Collections.emptyList() : portBindings;
+    }
+
+    private List<VolumeMount> safeVolumeMounts(List<VolumeMount> volumeMounts) {
+        return volumeMounts == null ? Collections.emptyList() : volumeMounts;
     }
 
     private String effectiveNetworkName(TerminalProperties.Docker docker, ContainerNetworkOptions networkOptions) {

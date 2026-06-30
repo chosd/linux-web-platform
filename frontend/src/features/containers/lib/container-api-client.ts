@@ -26,6 +26,11 @@ export type PortBindingPayload = {
   containerPort: number;
 };
 
+export type VolumeMountPayload = {
+  hostPath: string;
+  containerPath: string;
+};
+
 export type PortMapping = {
   hostPort?: number;
   containerPort?: number;
@@ -101,12 +106,13 @@ export async function createContainer(
   displayName: string,
   rootPassword: string,
   resourceLimits: ResourceLimitsPayload,
-  portBindings: PortBindingPayload[]
+  portBindings: PortBindingPayload[],
+  volumeMounts: VolumeMountPayload[]
 ) {
   const response = await fetch(`${containerApiBaseUrl}/api/containers`, {
     method: 'POST',
     headers: jsonHeaders,
-    body: JSON.stringify({ displayName, rootPassword, resourceLimits, portBindings })
+    body: JSON.stringify({ displayName, rootPassword, resourceLimits, portBindings, volumeMounts })
   });
   return parseContainerResponse(response, 'Container create request failed');
 }

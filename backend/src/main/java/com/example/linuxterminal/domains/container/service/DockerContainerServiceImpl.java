@@ -2,19 +2,24 @@ package com.example.linuxterminal.domains.container.service;
 
 import com.example.linuxterminal.domains.container.repository.FileContainerMetadataRepository;
 import com.example.linuxterminal.domains.container.dto.ResourceLimits;
+import com.example.linuxterminal.domains.container.dto.VolumeMount;
 import com.example.linuxterminal.domains.container.service.ContainerService;
 import com.example.linuxterminal.domains.container.service.ContainerService.ContainerInfo;
 import com.example.linuxterminal.domains.container.domain.ContainerRecord;
 import com.example.linuxterminal.domains.network.dto.ContainerNetworkOptions;
 import com.example.linuxterminal.domains.network.dto.PortBinding;
 import com.example.linuxterminal.domains.network.service.DockerNetworkService;
+import com.example.linuxterminal.global.config.TerminalProperties;
 import com.example.linuxterminal.global.docker.DockerCommandFactory;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +32,7 @@ public class DockerContainerServiceImpl implements ContainerService {
     private final ContainerNameGenerator containerNameGenerator;
     private final FileContainerMetadataRepository containerMetadataRepository;
     private final DockerNetworkService dockerNetworkService;
+    private final TerminalProperties terminalProperties;
     private final ConcurrentHashMap<String, Instant> lastActivityByContainerName = new ConcurrentHashMap<>();
     private final Set<String> connectedContainerNames = ConcurrentHashMap.newKeySet();
 
@@ -34,12 +40,14 @@ public class DockerContainerServiceImpl implements ContainerService {
             DockerCommandFactory dockerCommandFactory,
             ContainerNameGenerator containerNameGenerator,
             FileContainerMetadataRepository containerMetadataRepository,
-            DockerNetworkService dockerNetworkService
+            DockerNetworkService dockerNetworkService,
+            TerminalProperties terminalProperties
     ) {
         this.dockerCommandFactory = dockerCommandFactory;
         this.containerNameGenerator = containerNameGenerator;
         this.containerMetadataRepository = containerMetadataRepository;
         this.dockerNetworkService = dockerNetworkService;
+        this.terminalProperties = terminalProperties;
     }
 
     public ContainerInfo startOrGetContainer(String userId) throws IOException {
@@ -80,7 +88,7 @@ public class DockerContainerServiceImpl implements ContainerService {
             String rootPassword,
             List<PortBinding> portBindings
     ) throws IOException {
-        return createContainer(userId, displayName, requestedResourceLimits, rootPassword, portBindings, null);
+        return createContainer(userId, displayName, requestedResourceLimits, rootPassword, portBindings, List.of(), null);
     }
 
     public ContainerInfo createContainer(
@@ -89,6 +97,7 @@ public class DockerContainerServiceImpl implements ContainerService {
             ResourceLimits requestedResourceLimits,
             String rootPassword,
             List<PortBinding> portBindings,
+            List<VolumeMount> volumeMounts,
             ContainerNetworkOptions networkOptions
     ) throws IOException {
         String normalizedUserId = normalizeUserId(userId);
@@ -96,7 +105,9 @@ public class DockerContainerServiceImpl implements ContainerService {
         String normalizedDisplayName = normalizeDisplayName(displayName);
         ResourceLimits resourceLimits = normalizeResourceLimits(requestedResourceLimits);
         List<PortBinding> normalizedPortBindings = normalizePortBindings(portBindings);
+        List<VolumeMount> normalizedVolumeMounts = normalizeVolumeMounts(volumeMounts);
         ContainerNetworkOptions normalizedNetworkOptions = normalizeNetworkOptions(networkOptions, normalizedDisplayName);
+        validateNetworkForPortBindings(normalizedPortBindings, normalizedNetworkOptions);
         dockerNetworkService.validatePortBindings(normalizedPortBindings);
         ContainerRecord containerRecord = new ContainerRecord(
                 normalizedUserId,
@@ -110,6 +121,7 @@ public class DockerContainerServiceImpl implements ContainerService {
                 containerName,
                 resourceLimits,
                 normalizedPortBindings,
+                normalizedVolumeMounts,
                 normalizedNetworkOptions));
         applyRootPasswordIfPresent(containerName, rootPassword);
         containerMetadataRepository.save(containerRecord);
@@ -356,6 +368,86 @@ public class DockerContainerServiceImpl implements ContainerService {
 
     private List<PortBinding> normalizePortBindings(List<PortBinding> portBindings) {
         return portBindings == null ? List.of() : portBindings;
+    }
+
+    private void validateNetworkForPortBindings(
+            List<PortBinding> portBindings,
+            ContainerNetworkOptions networkOptions
+    ) throws IOException {
+        if (portBindings == null || portBindings.isEmpty()) {
+            return;
+        }
+        String effectiveNetworkName = networkOptions != null && networkOptions.hasNetwork()
+                ? networkOptions.networkName().trim()
+                : terminalProperties.getDocker().getNetwork();
+        if ("none".equals(effectiveNetworkName.toLowerCase(Locale.ROOT))) {
+            throw new IOException("Port bindings require bridge or user-defined Docker network. Current network is none.");
+        }
+    }
+
+    private List<VolumeMount> normalizeVolumeMounts(List<VolumeMount> volumeMounts) throws IOException {
+        if (volumeMounts == null || volumeMounts.isEmpty()) {
+            return List.of();
+        }
+
+        Path allowedBase = createAndResolveAllowedVolumeBase();
+        List<VolumeMount> normalizedVolumeMounts = new ArrayList<>();
+        Set<String> containerPaths = ConcurrentHashMap.newKeySet();
+        for (VolumeMount volumeMount : volumeMounts) {
+            if (volumeMount == null) {
+                continue;
+            }
+            Path hostPath = createAndResolveHostVolumePath(volumeMount.hostPath(), allowedBase);
+            String containerPath = normalizeContainerVolumePath(volumeMount.containerPath());
+            if (!containerPaths.add(containerPath)) {
+                throw new IOException("Container volume path is duplicated: " + containerPath);
+            }
+            normalizedVolumeMounts.add(new VolumeMount(hostPath.toString(), containerPath));
+        }
+        return List.copyOf(normalizedVolumeMounts);
+    }
+
+    private Path createAndResolveAllowedVolumeBase() throws IOException {
+        String configuredBase = terminalProperties.getDocker().getAllowedVolumeHostPathBase();
+        if (configuredBase == null || configuredBase.isBlank()) {
+            throw new IOException("Allowed volume host path base is not configured.");
+        }
+        Path allowedBase = Path.of(configuredBase.trim()).toAbsolutePath().normalize();
+        Files.createDirectories(allowedBase);
+        return allowedBase.toRealPath();
+    }
+
+    private Path createAndResolveHostVolumePath(String rawHostPath, Path allowedBase) throws IOException {
+        if (rawHostPath == null || rawHostPath.isBlank()) {
+            throw new IOException("Volume host path is required.");
+        }
+        if (rawHostPath.contains(":")) {
+            throw new IOException("Volume host path must not contain ':'.");
+        }
+        Path hostPath = Path.of(rawHostPath.trim()).toAbsolutePath().normalize();
+        if (!hostPath.startsWith(allowedBase) || hostPath.equals(allowedBase)) {
+            throw new IOException("Volume host path must be under allowed base path: " + allowedBase);
+        }
+        Files.createDirectories(hostPath);
+        Path realHostPath = hostPath.toRealPath();
+        if (!realHostPath.startsWith(allowedBase) || realHostPath.equals(allowedBase)) {
+            throw new IOException("Volume host path must be under allowed base path: " + allowedBase);
+        }
+        return realHostPath;
+    }
+
+    private String normalizeContainerVolumePath(String rawContainerPath) throws IOException {
+        if (rawContainerPath == null || rawContainerPath.isBlank()) {
+            throw new IOException("Volume container path is required.");
+        }
+        if (rawContainerPath.contains(":")) {
+            throw new IOException("Volume container path must not contain ':'.");
+        }
+        Path containerPath = Path.of(rawContainerPath.trim()).normalize();
+        if (!containerPath.isAbsolute() || containerPath.getNameCount() == 0) {
+            throw new IOException("Volume container path must be an absolute directory below root.");
+        }
+        return containerPath.toString();
     }
 
     private ContainerNetworkOptions normalizeNetworkOptions(

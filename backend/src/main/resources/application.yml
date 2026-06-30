@@ -19,7 +19,7 @@ terminal:
     cpus: "0.5"
     memory: 256m
     pids-limit: 64
-    network: none
+    network: bridge
     user: suser
     workdir: /home/suser
     command:
@@ -28,4 +28,5 @@ terminal:
       - /bin/bash --login
       - /dev/null
     container-name-prefix: linux-terminal
+    allowed-volume-host-path-base: /mnt/storage
     container-name-session-id-length: 24

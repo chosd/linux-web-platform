@@ -5,18 +5,20 @@ import {
   getContainerNetworkDashboard
 } from '/src/features/containers/lib/container-api-client';
 
-type ContainerNetworkDashboardPanelProps = {
+type ContainerNetworkDrawerProps = {
   containerName: string | null;
   displayName?: string;
+  isOpen: boolean;
+  onClose: () => void;
 };
 
-export function ContainerNetworkDashboardPanel({ containerName, displayName }: ContainerNetworkDashboardPanelProps) {
+export function ContainerNetworkDrawer({ containerName, displayName, isOpen, onClose }: ContainerNetworkDrawerProps) {
   const [dashboard, setDashboard] = useState<ContainerNetworkDashboard | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!containerName) {
+    if (!containerName || !isOpen) {
       setDashboard(null);
       setErrorMessage('');
       return;
@@ -45,67 +47,88 @@ export function ContainerNetworkDashboardPanel({ containerName, displayName }: C
     return () => {
       isActive = false;
     };
-  }, [containerName]);
+  }, [containerName, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   return (
-    <section className="network-panel">
-      <header className="panel-header">
-        <div>
-          <h2>네트워크 대시보드</h2>
-          <p>{displayName || '컨테이너를 선택하면 IP와 포트 매핑이 표시됩니다.'}</p>
-        </div>
-      </header>
-
-      {!containerName ? (
-        <div className="empty-state">네트워크 정보를 확인할 컨테이너를 선택하세요.</div>
-      ) : errorMessage ? (
-        <div className="error-banner">{errorMessage}</div>
-      ) : isLoading ? (
-        <div className="empty-state">Loading network...</div>
-      ) : (
-        <div className="network-dashboard-grid">
-          <div className="network-card">
-            <h3>IP 주소</h3>
-            {dashboard?.networks.length ? (
-              <div className="network-list">
-                {dashboard.networks.map((network) => (
-                  <div className="network-row" key={`${network.name}-${network.ipAddress}`}>
-                    <strong>{network.name}</strong>
-                    <span>{network.ipAddress || 'unassigned'}</span>
-                    <small>{network.gateway ? `gateway ${network.gateway}` : 'no gateway'}</small>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-inline">네트워크 없음</div>
-            )}
+    <div className={`network-drawer-root ${isOpen ? 'network-drawer-root-open' : ''}`} aria-hidden={!isOpen}>
+      <button type="button" className="network-drawer-backdrop" aria-label="Close network drawer" onClick={onClose} />
+      <aside className="network-drawer" aria-label="Container network details">
+        <header className="network-drawer-header">
+          <div>
+            <span>Network</span>
+            <h2>{displayName || '컨테이너 네트워크'}</h2>
+            <p>{containerName || '선택된 컨테이너가 없습니다.'}</p>
           </div>
+          <button type="button" className="drawer-close-button" aria-label="Close" onClick={onClose}>
+            ×
+          </button>
+        </header>
 
-          <div className="network-card">
-            <h3>포트 포워딩</h3>
-            {dashboard?.ports.length ? (
-              <div className="port-mapping-list">
-                {dashboard.ports.map((port) => (
-                  <div className="port-mapping-row" key={`${port.protocol}-${port.hostPort}-${port.containerPort}`}>
-                    <span>
-                      {port.containerPort}/{port.protocol.toLowerCase()}
-                    </span>
-                    {port.url ? (
-                      <a href={port.url} target="_blank" rel="noreferrer">
-                        localhost:{port.hostPort}
-                      </a>
-                    ) : (
-                      <small>not published</small>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-inline">노출된 포트 없음</div>
-            )}
+        {errorMessage ? (
+          <div className="error-banner">{errorMessage}</div>
+        ) : isLoading ? (
+          <div className="drawer-empty-state">Loading network...</div>
+        ) : (
+          <div className="network-drawer-content">
+            <section className="network-card">
+              <h3>IP 주소</h3>
+              {dashboard?.networks.length ? (
+                <div className="network-list">
+                  {dashboard.networks.map((network) => (
+                    <div className="network-row" key={`${network.name}-${network.ipAddress}`}>
+                      <strong>{network.name}</strong>
+                      <span>{network.ipAddress || 'unassigned'}</span>
+                      <small>{network.gateway ? `gateway ${network.gateway}` : 'no gateway'}</small>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-inline">연결된 네트워크가 없습니다.</div>
+              )}
+            </section>
+
+            <section className="network-card">
+              <h3>포트 포워딩</h3>
+              {dashboard?.ports.length ? (
+                <div className="port-mapping-list">
+                  {dashboard.ports.map((port) => (
+                    <div className="port-mapping-row" key={`${port.protocol}-${port.hostPort}-${port.containerPort}`}>
+                      <span>
+                        {port.containerPort}/{port.protocol.toLowerCase()}
+                      </span>
+                      {port.url ? (
+                        <a href={port.url} target="_blank" rel="noreferrer">
+                          localhost:{port.hostPort}
+                        </a>
+                      ) : (
+                        <small>not published</small>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-inline">노출된 포트가 없습니다.</div>
+              )}
+            </section>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </aside>
+    </div>
   );
 }

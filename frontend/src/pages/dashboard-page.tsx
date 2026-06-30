@@ -1,18 +1,21 @@
 import { HostResourceDashboard } from '/src/features/dashboard/components/host-resource-dashboard';
 import { HostResourceStatsSample } from '/src/features/dashboard/lib/dashboard-api-client';
+import { ContainerListPanel } from '/src/features/containers/components/container-list-panel';
 
 type DashboardPageProps = {
   hostResourceStats: HostResourceStatsSample | null;
   isLoadingHostResources: boolean;
   hostResourceErrorMessage: string;
   onRefreshHostResources: () => void;
+  onConnectTerminal: (containerName: string, displayName: string) => void;
 };
 
 export function DashboardPage({
   hostResourceStats,
   isLoadingHostResources,
   hostResourceErrorMessage,
-  onRefreshHostResources
+  onRefreshHostResources,
+  onConnectTerminal
 }: DashboardPageProps) {
   return (
     <main className="dashboard-page">
@@ -29,6 +32,7 @@ export function DashboardPage({
           errorMessage={hostResourceErrorMessage}
           onRefresh={onRefreshHostResources}
         />
+        <ContainerListPanel onConnectTerminal={onConnectTerminal} />
       </div>
     </main>
   );
