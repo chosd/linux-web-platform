@@ -20,8 +20,8 @@ terminal:
     memory: 256m
     pids-limit: 64
     network: none
-    user: student
-    workdir: /home/student
+    user: suser
+    workdir: /home/suser
     command:
       - /usr/bin/script
       - -qfec

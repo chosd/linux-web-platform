@@ -81,10 +81,10 @@ public class TerminalProperties {
         private String network = "none";
 
         @NotBlank
-        private String user = "student";
+        private String user = "suser";
 
         @NotBlank
-        private String workdir = "/home/student";
+        private String workdir = "/home/suser";
 
         private List<String> command = new ArrayList<>(
                 List.of("/usr/bin/script", "-qfec", "/bin/bash --login", "/dev/null"));
