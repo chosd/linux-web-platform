@@ -4,6 +4,9 @@ import {
   ContainerNetworkDashboard,
   getContainerNetworkDashboard
 } from '/src/features/containers/lib/container-api-client';
+import { ErrorBanner } from '/src/shared/components/feedback';
+
+import styles from './container-components.module.css';
 
 type ContainerNetworkDrawerProps = {
   containerName: string | null;
@@ -66,32 +69,32 @@ export function ContainerNetworkDrawer({ containerName, displayName, isOpen, onC
   }, [isOpen, onClose]);
 
   return (
-    <div className={`network-drawer-root ${isOpen ? 'network-drawer-root-open' : ''}`} aria-hidden={!isOpen}>
-      <button type="button" className="network-drawer-backdrop" aria-label="Close network drawer" onClick={onClose} />
-      <aside className="network-drawer" aria-label="Container network details">
-        <header className="network-drawer-header">
+    <div className={`${styles.networkDrawerRoot} ${isOpen ? styles.networkDrawerRootOpen : ''}`} aria-hidden={!isOpen}>
+      <button type="button" className={styles.networkDrawerBackdrop} aria-label="Close network drawer" onClick={onClose} />
+      <aside className={styles.networkDrawer} aria-label="Container network details">
+        <header className={styles.networkDrawerHeader}>
           <div>
             <span>Network</span>
             <h2>{displayName || '컨테이너 네트워크'}</h2>
             <p>{containerName || '선택된 컨테이너가 없습니다.'}</p>
           </div>
-          <button type="button" className="drawer-close-button" aria-label="Close" onClick={onClose}>
+          <button type="button" className={styles.drawerCloseButton} aria-label="Close" onClick={onClose}>
             ×
           </button>
         </header>
 
         {errorMessage ? (
-          <div className="error-banner">{errorMessage}</div>
+          <ErrorBanner>{errorMessage}</ErrorBanner>
         ) : isLoading ? (
-          <div className="drawer-empty-state">Loading network...</div>
+          <div className={styles.drawerEmptyState}>Loading network...</div>
         ) : (
-          <div className="network-drawer-content">
-            <section className="network-card">
+          <div className={styles.networkDrawerContent}>
+            <section className={styles.networkCard}>
               <h3>IP 주소</h3>
               {dashboard?.networks.length ? (
-                <div className="network-list">
+                <div className={styles.networkList}>
                   {dashboard.networks.map((network) => (
-                    <div className="network-row" key={`${network.name}-${network.ipAddress}`}>
+                    <div className={styles.networkRow} key={`${network.name}-${network.ipAddress}`}>
                       <strong>{network.name}</strong>
                       <span>{network.ipAddress || 'unassigned'}</span>
                       <small>{network.gateway ? `gateway ${network.gateway}` : 'no gateway'}</small>
@@ -99,16 +102,16 @@ export function ContainerNetworkDrawer({ containerName, displayName, isOpen, onC
                   ))}
                 </div>
               ) : (
-                <div className="empty-inline">연결된 네트워크가 없습니다.</div>
+                <div className={styles.emptyInline}>연결된 네트워크가 없습니다.</div>
               )}
             </section>
 
-            <section className="network-card">
+            <section className={styles.networkCard}>
               <h3>포트 포워딩</h3>
               {dashboard?.ports.length ? (
-                <div className="port-mapping-list">
+                <div className={styles.portMappingList}>
                   {dashboard.ports.map((port) => (
-                    <div className="port-mapping-row" key={`${port.protocol}-${port.hostPort}-${port.containerPort}`}>
+                    <div className={styles.portMappingRow} key={`${port.protocol}-${port.hostPort}-${port.containerPort}`}>
                       <span>
                         {port.containerPort}/{port.protocol.toLowerCase()}
                       </span>
@@ -123,7 +126,7 @@ export function ContainerNetworkDrawer({ containerName, displayName, isOpen, onC
                   ))}
                 </div>
               ) : (
-                <div className="empty-inline">노출된 포트가 없습니다.</div>
+                <div className={styles.emptyInline}>노출된 포트가 없습니다.</div>
               )}
             </section>
           </div>

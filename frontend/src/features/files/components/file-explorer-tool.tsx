@@ -8,7 +8,11 @@ import {
   uploadContainerFile
 } from '/src/features/files/lib/container-file-api-client';
 import { Button } from '/src/shared/components/button';
+import { EmptyState, ErrorBanner } from '/src/shared/components/feedback';
+import { FormField } from '/src/shared/components/form-field';
 import { StatusBadge } from '/src/shared/components/status-badge';
+
+import styles from './file-explorer-tool.module.css';
 
 type TreeNode = {
   path: string;
@@ -116,10 +120,9 @@ export function FileExplorerTool() {
   };
 
   return (
-    <section className="file-explorer-tool">
-      <div className="file-toolbar">
-        <div className="form-field">
-          <label htmlFor="file-container-select">컨테이너</label>
+    <section className={styles.tool}>
+      <div className={styles.toolbar}>
+        <FormField htmlFor="file-container-select" label="컨테이너">
           <select
             id="file-container-select"
             value={selectedContainerName}
@@ -131,21 +134,21 @@ export function FileExplorerTool() {
               </option>
             ))}
           </select>
-        </div>
+        </FormField>
         {selectedContainer && <StatusBadge label={selectedContainer.status} />}
         <Button type="button" onClick={() => loadFiles(selectedContainerName, currentPath)} disabled={isLoading}>
           새로고침
         </Button>
-        <label className="file-upload-button">
+        <label className={styles.uploadButton}>
           파일 선택
           <input type="file" multiple onChange={handleFileInputChange} disabled={isUploading} />
         </label>
       </div>
 
-      {errorMessage && <div className="error-banner">{errorMessage}</div>}
+      {errorMessage && <ErrorBanner>{errorMessage}</ErrorBanner>}
 
       <div
-        className={`file-explorer-grid ${isDragOver ? 'file-drop-active' : ''}`}
+        className={`${styles.explorerGrid} ${isDragOver ? styles.dropActive : ''}`}
         onDragOver={(event) => {
           event.preventDefault();
           setIsDragOver(true);
@@ -153,17 +156,17 @@ export function FileExplorerTool() {
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
       >
-        <aside className="file-tree-panel" aria-label="Directory tree">
-          <header>
+        <aside className={styles.treePanel} aria-label="Directory tree">
+          <header className={styles.treeHeader}>
             <h2>디렉토리</h2>
             <span>{selectedContainer?.displayName || 'No container'}</span>
           </header>
-          <nav>
+          <nav className={styles.treeNav}>
             {treeNodes.map((node) => (
               <button
                 key={node.path}
                 type="button"
-                className={node.path === currentPath ? 'file-tree-node file-tree-node-active' : 'file-tree-node'}
+                className={`${styles.treeNode} ${node.path === currentPath ? styles.treeNodeActive : ''}`}
                 onClick={() => loadFiles(selectedContainerName, node.path)}
               >
                 {node.label}
@@ -172,8 +175,8 @@ export function FileExplorerTool() {
           </nav>
         </aside>
 
-        <section className="file-list-panel">
-          <header className="file-path-header">
+        <section className={styles.listPanel}>
+          <header className={styles.pathHeader}>
             <div>
               <h2>{currentPath}</h2>
               <p>폴더는 더블 클릭으로 진입하고, 파일은 클릭하면 다운로드됩니다.</p>
@@ -184,10 +187,10 @@ export function FileExplorerTool() {
           </header>
 
           {isLoading ? (
-            <div className="empty-state">Loading files...</div>
+            <EmptyState>Loading files...</EmptyState>
           ) : (
-            <div className="file-table-scroll">
-              <table className="file-table">
+            <div className={styles.tableScroll}>
+              <table className={styles.fileTable}>
                 <thead>
                   <tr>
                     <th>이름</th>
@@ -204,7 +207,7 @@ export function FileExplorerTool() {
                       onClick={() => file.type === 'FILE' && downloadFile(file.name)}
                     >
                       <td>
-                        <span className="file-name-cell">
+                        <span className={styles.fileNameCell}>
                           <small>{file.type === 'DIRECTORY' ? 'DIR' : 'FILE'}</small>
                           {file.name}
                         </span>
@@ -217,7 +220,7 @@ export function FileExplorerTool() {
                   {files.length === 0 && (
                     <tr>
                       <td colSpan={4}>
-                        <div className="empty-state">No files.</div>
+                        <EmptyState>No files.</EmptyState>
                       </td>
                     </tr>
                   )}
@@ -225,7 +228,7 @@ export function FileExplorerTool() {
               </table>
             </div>
           )}
-          {isUploading && <div className="upload-state">Uploading...</div>}
+          {isUploading && <div className={styles.uploadState}>Uploading...</div>}
         </section>
       </div>
     </section>

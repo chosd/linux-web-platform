@@ -9,6 +9,10 @@ import {
 } from 'recharts';
 
 import { useContainerStats } from '/src/features/containers/lib/use-container-stats';
+import { EmptyState, ErrorBanner } from '/src/shared/components/feedback';
+import { PanelHeader } from '/src/shared/components/panel-header';
+
+import styles from './container-components.module.css';
 
 type ContainerStatsChartProps = {
   containerName: string | null;
@@ -25,28 +29,28 @@ export function ContainerStatsChart({ containerName, displayName }: ContainerSta
   const latest = samples.length > 0 ? samples[samples.length - 1] : undefined;
 
   return (
-    <section className="stats-panel">
-      <header className="panel-header">
-        <div>
-          <h2>실시간 자원 사용량</h2>
-          <p>{displayName || '컨테이너를 선택하면 CPU와 메모리 추이가 표시됩니다.'}</p>
-        </div>
-        {latest && (
-          <div className="stats-summary">
+    <section className={styles.statsPanel}>
+      <PanelHeader
+        title="실시간 자원 사용량"
+        description={displayName || '컨테이너를 선택하면 CPU와 메모리 추이가 표시됩니다.'}
+        actions={
+          latest && (
+          <div className={styles.statsSummary}>
             <span>CPU {latest.cpuPercent.toFixed(1)}%</span>
             <span>
               MEM {latest.memoryUsageMb.toFixed(1)} / {latest.memoryLimitMb.toFixed(0)} MB
             </span>
           </div>
-        )}
-      </header>
+          )
+        }
+      />
 
       {!containerName ? (
-        <div className="empty-state">모니터링할 컨테이너를 선택하세요.</div>
+        <EmptyState>모니터링할 컨테이너를 선택하세요.</EmptyState>
       ) : errorMessage ? (
-        <div className="error-banner">{errorMessage}</div>
+        <ErrorBanner>{errorMessage}</ErrorBanner>
       ) : (
-        <div className="stats-chart">
+        <div className={styles.statsChart}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 12, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />

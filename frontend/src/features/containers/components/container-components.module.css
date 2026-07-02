@@ -1,0 +1,485 @@
+.crudTool {
+  display: grid;
+  gap: 14px;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.createPanel,
+.tablePanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.createPanel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.createFormCard {
+  max-width: 760px;
+  width: 100%;
+}
+
+.createPanel h2,
+.editorHeader h3,
+.networkCard h3 {
+  color: var(--color-text-strong);
+  line-height: 1.25;
+  margin: 0 0 5px;
+}
+
+.createPanel h2 {
+  font-size: 16px;
+}
+
+.createPanel p,
+.editorHeader p {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.editorHeader h3,
+.networkCard h3 {
+  font-size: 13px;
+}
+
+.editorHeader p {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.createFormGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.createFormActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tablePanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tableScroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.containerTable {
+  border-collapse: collapse;
+  min-width: 860px;
+  width: 100%;
+}
+
+.containerTable th,
+.containerTable td {
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.containerTable th {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.inlineEditGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(160px, 1fr) 86px 110px;
+  min-width: 380px;
+}
+
+.inlineEditInput {
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  font: inherit;
+  min-height: 38px;
+  min-width: 0;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.identityCell,
+.resourceLimitCell {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.identityCell strong {
+  color: var(--color-text-strong);
+  font-size: 14px;
+  line-height: 1.25;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+}
+
+.identityCell span {
+  color: var(--color-text-subtle);
+  cursor: help;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+.resourceLimitCell span {
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.resourceLimitCell small {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.tableActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 280px;
+}
+
+.actionMenu {
+  position: relative;
+}
+
+.actionMenuTrigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 18px;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 36px;
+}
+
+.actionMenuTrigger:hover:not(:disabled),
+.actionMenuTrigger[aria-expanded="true"] {
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.actionMenuTrigger:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.actionMenuPopover {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-elevated);
+  display: grid;
+  gap: 4px;
+  min-width: 132px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+}
+
+.actionMenuPopover button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  min-height: 34px;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.actionMenuPopover button:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.actionMenuPopover button:disabled {
+  color: var(--color-text-subtle);
+  cursor: not-allowed;
+}
+
+.dangerMenuItem {
+  color: var(--color-danger-text) !important;
+}
+
+.statsPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: grid;
+  grid-template-rows: auto 220px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.statsSummary {
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.statsChart {
+  min-height: 0;
+  padding: 10px 12px 12px;
+}
+
+.settingsEditor {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.editorHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.emptyHint {
+  background: var(--color-sunken);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 14px;
+}
+
+.portBindingList,
+.volumeMountList {
+  display: grid;
+  gap: 10px;
+}
+
+.portBindingRow {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 120px minmax(120px, 1fr) minmax(120px, 1fr) auto;
+}
+
+.volumeMountRow {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+}
+
+.networkDrawerRoot {
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity 180ms ease;
+  z-index: 80;
+}
+
+.networkDrawerRootOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.networkDrawerBackdrop {
+  background: rgb(0 0 0 / 0.52);
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.networkDrawer {
+  background: var(--color-bg-elevated);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevated);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  margin-left: auto;
+  max-width: 460px;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+  width: min(460px, 100vw);
+}
+
+.networkDrawerRootOpen .networkDrawer {
+  transform: translateX(0);
+}
+
+.networkDrawerHeader {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px;
+}
+
+.networkDrawerHeader span {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.networkDrawerHeader h2 {
+  color: var(--color-text-strong);
+  font-size: 19px;
+  line-height: 1.2;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.networkDrawerHeader p {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.drawerCloseButton {
+  align-items: center;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  width: 36px;
+}
+
+.networkDrawerContent {
+  display: grid;
+  gap: 14px;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.drawerEmptyState {
+  color: var(--color-text-muted);
+  padding: 18px;
+}
+
+.networkCard {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.networkList,
+.portMappingList {
+  display: grid;
+  gap: 8px;
+}
+
+.networkRow,
+.portMappingRow {
+  align-items: center;
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.networkRow strong,
+.portMappingRow span {
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.networkRow span,
+.portMappingRow a {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.networkRow small,
+.portMappingRow small,
+.emptyInline {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .crudTool {
+    padding: 10px;
+  }
+
+  .createFormCard {
+    max-width: none;
+  }
+
+  .createFormGrid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .createFormActions,
+  .editorHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .portBindingRow,
+  .volumeMountRow {
+    grid-template-columns: 1fr;
+  }
+}

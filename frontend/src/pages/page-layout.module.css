@@ -1,0 +1,58 @@
+.contentPage {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.contentHeader {
+  align-items: center;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px;
+}
+
+.titleGroup {
+  min-width: 0;
+}
+
+.contentHeader h1 {
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 0 0 5px;
+}
+
+.contentHeader p {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.dashboardPage {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboardContent {
+  display: grid;
+  gap: 18px;
+  grid-template-rows: auto minmax(420px, 1fr);
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+@media (max-width: 640px) {
+  .contentHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

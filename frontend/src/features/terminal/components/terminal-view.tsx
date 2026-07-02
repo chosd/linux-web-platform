@@ -13,6 +13,8 @@ import { messageForClose } from '/src/features/terminal/lib/terminal-close-messa
 import { Button } from '/src/shared/components/button';
 import { StatusBadge } from '/src/shared/components/status-badge';
 
+import styles from './terminal-view.module.css';
+
 type TerminalViewProps = {
   containerName: string;
   displayName: string;
@@ -168,17 +170,17 @@ export function TerminalView({ containerName, displayName, onBack }: TerminalVie
   }, [connect, disconnect, fitTerminal]);
 
   return (
-    <main className="terminal-page">
-      <header className="terminal-toolbar">
-        <div className="page-title-group">
+    <main className={styles.page}>
+      <header className={styles.toolbar}>
+        <div className={styles.titleGroup}>
           <h1>Linux Terminal Playground</h1>
-          <div className="terminal-subtitle">{displayName}</div>
-          <div className="connection-row">
+          <div className={styles.subtitle}>{displayName}</div>
+          <div className={styles.connectionRow}>
             <StatusBadge label={status} />
-            <span className="status-message">{statusMessage}</span>
+            <span className={styles.statusMessage}>{statusMessage}</span>
           </div>
         </div>
-        <div className="terminal-actions">
+        <div className={styles.actions}>
           <Button type="button" onClick={onBack}>
             Dashboard
           </Button>
@@ -187,11 +189,11 @@ export function TerminalView({ containerName, displayName, onBack }: TerminalVie
           </Button>
         </div>
       </header>
-      <div className="terminal-workspace">
-        <section className="terminal-shell" aria-label="Linux terminal">
-          <div ref={terminalElementRef} className="terminal-host" />
+      <div className={styles.workspace}>
+        <section className={styles.shell} aria-label="Linux terminal">
+          <div ref={terminalElementRef} className={styles.host} />
         </section>
-        <aside className="usage-panel" aria-label="Basic terminal usage">
+        <aside className={styles.usagePanel} aria-label="Basic terminal usage">
           <h2>Usage</h2>
           <ul>
             <li>Type commands directly in the terminal.</li>

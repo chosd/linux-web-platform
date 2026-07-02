@@ -9,7 +9,11 @@ import {
 } from '/src/features/containers/lib/container-api-client';
 import { ContainerNetworkDrawer } from '/src/features/containers/components/container-network-dashboard';
 import { Button } from '/src/shared/components/button';
+import { EmptyState, ErrorBanner } from '/src/shared/components/feedback';
+import { PanelHeader } from '/src/shared/components/panel-header';
 import { StatusBadge } from '/src/shared/components/status-badge';
+
+import styles from './container-components.module.css';
 
 type ContainerListPanelProps = {
   onConnectTerminal: (containerName: string, displayName: string) => void;
@@ -136,26 +140,26 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
 
   return (
     <>
-      <section className="container-table-panel">
-        <header className="panel-header">
-          <div>
-            <h2>실행 중인 컨테이너</h2>
-            <p>컨테이너 상태, 리소스 제한, 네트워크 정보를 확인하고 작업을 실행합니다.</p>
-          </div>
+      <section className={styles.tablePanel}>
+        <PanelHeader
+          title="실행 중인 컨테이너"
+          description="컨테이너 상태, 리소스 제한, 네트워크 정보를 확인하고 작업을 실행합니다."
+          actions={
           <Button type="button" onClick={loadContainers} disabled={isLoading}>
             새로고침
           </Button>
-        </header>
+          }
+        />
 
-        {errorMessage && <div className="error-banner">{errorMessage}</div>}
+        {errorMessage && <ErrorBanner>{errorMessage}</ErrorBanner>}
 
         {isLoading ? (
-          <div className="empty-state">Loading containers...</div>
+          <EmptyState>Loading containers...</EmptyState>
         ) : sortedContainers.length === 0 ? (
-          <div className="empty-state">No containers yet.</div>
+          <EmptyState>No containers yet.</EmptyState>
         ) : (
-          <div className="container-table-scroll">
-            <table className="container-table">
+          <div className={styles.tableScroll}>
+            <table className={styles.containerTable}>
               <thead>
                 <tr>
                   <th>이름 / ID</th>
@@ -177,14 +181,14 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                     <tr key={container.containerName}>
                       <td>
                         {isEditing ? (
-                          <div className="inline-edit-grid">
+                          <div className={styles.inlineEditGrid}>
                             <input
-                              className="inline-edit-input"
+                              className={styles.inlineEditInput}
                               value={editingDisplayName}
                               onChange={(event) => setEditingDisplayName(event.target.value)}
                             />
                             <input
-                              className="inline-edit-input"
+                              className={styles.inlineEditInput}
                               type="number"
                               min="0.1"
                               max="4"
@@ -194,7 +198,7 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                               aria-label="CPU limit"
                             />
                             <input
-                              className="inline-edit-input"
+                              className={styles.inlineEditInput}
                               type="number"
                               min="128"
                               max="4096"
@@ -205,7 +209,7 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                             />
                           </div>
                         ) : (
-                          <div className="container-identity-cell">
+                          <div className={styles.identityCell}>
                             <strong>{container.displayName}</strong>
                             <span title={container.containerName}>{shortContainerId}</span>
                           </div>
@@ -215,14 +219,14 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                         <StatusBadge label={container.status} />
                       </td>
                       <td>
-                        <div className="resource-limit-cell">
+                        <div className={styles.resourceLimitCell}>
                           <span>{formatCpuCores(container.cpuCores ?? 0.5)} Cores</span>
                           <small>{container.memoryMb ?? 256} MB</small>
                         </div>
                       </td>
                       <td>{new Date(container.createdAt).toLocaleString()}</td>
                       <td>
-                        <div className="table-actions">
+                        <div className={styles.tableActions}>
                           {isEditing ? (
                             <>
                               <Button
@@ -271,10 +275,10 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                                   시작
                                 </Button>
                               )}
-                              <div className="action-menu">
+                              <div className={styles.actionMenu}>
                                 <button
                                   type="button"
-                                  className="action-menu-trigger"
+                                  className={styles.actionMenuTrigger}
                                   aria-label={`${container.displayName} more actions`}
                                   aria-expanded={isActionMenuOpen}
                                   onClick={() =>
@@ -285,7 +289,7 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                                   ⋮
                                 </button>
                                 {isActionMenuOpen && (
-                                  <div className="action-menu-popover" role="menu">
+                                  <div className={styles.actionMenuPopover} role="menu">
                                     <button type="button" role="menuitem" onClick={() => beginEdit(container)}>
                                       수정
                                     </button>
@@ -300,7 +304,7 @@ export function ContainerListPanel({ onConnectTerminal }: ContainerListPanelProp
                                     <button
                                       type="button"
                                       role="menuitem"
-                                      className="danger-menu-item"
+                                      className={styles.dangerMenuItem}
                                       onClick={() => handleDelete(container.containerName)}
                                     >
                                       삭제

@@ -3,6 +3,8 @@ import { ReactNode } from 'react';
 import { HostResourceStatsSample } from '/src/features/dashboard/lib/dashboard-api-client';
 import { useTheme } from '/src/shared/contexts/theme-context';
 
+import styles from './app-shell.module.css';
+
 export type AppMenuKey = 'dashboard' | 'containers' | 'files';
 
 type AppShellProps = {
@@ -34,16 +36,16 @@ export function AppShell({ activeMenu, children, hostResourceStats, onSelectMenu
   const { isDark, toggleTheme } = useTheme();
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar" aria-label="Main navigation">
-        <div className="sidebar-header">
-          <div className="sidebar-brand">
+    <div className={styles.shell}>
+      <aside className={styles.sidebar} aria-label="Main navigation">
+        <div className={styles.sidebarHeader}>
+          <div className={styles.sidebarBrand}>
             <strong>Linux Terminal</strong>
             <span>Platform</span>
           </div>
           <button
             type="button"
-            className="theme-toggle-button"
+            className={styles.themeToggle}
             aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
             aria-pressed={isDark}
             onClick={toggleTheme}
@@ -51,12 +53,12 @@ export function AppShell({ activeMenu, children, hostResourceStats, onSelectMenu
             <span>{isDark ? 'Light' : 'Dark'}</span>
           </button>
         </div>
-        <nav className="sidebar-nav">
+        <nav className={styles.sidebarNav}>
           {navItems.map((item) => (
             <button
               key={item.key}
               type="button"
-              className={`sidebar-tab ${activeMenu === item.key ? 'sidebar-tab-active' : ''}`}
+              className={`${styles.sidebarTab} ${activeMenu === item.key ? styles.sidebarTabActive : ''}`}
               onClick={() => onSelectMenu(item.key)}
             >
               <span>{item.label}</span>
@@ -66,7 +68,7 @@ export function AppShell({ activeMenu, children, hostResourceStats, onSelectMenu
         </nav>
         <SidebarResourceSummary stats={hostResourceStats} />
       </aside>
-      <div className="app-content">{children}</div>
+      <div className={styles.content}>{children}</div>
     </div>
   );
 }
@@ -77,19 +79,19 @@ type SidebarResourceSummaryProps = {
 
 function SidebarResourceSummary({ stats }: SidebarResourceSummaryProps) {
   return (
-    <section className="sidebar-resource-summary" aria-label="Host resource summary">
+    <section className={styles.resourceSummary} aria-label="Host resource summary">
       <div>
         <span>Host CPU</span>
         <strong>{stats ? `${stats.cpuPercent.toFixed(1)}%` : '-'}</strong>
       </div>
-      <div className="sidebar-resource-track">
+      <div className={styles.resourceTrack}>
         <span style={{ width: `${stats ? clampPercent(stats.cpuPercent) : 0}%` }} />
       </div>
       <div>
         <span>Host Memory</span>
         <strong>{stats ? `${stats.memoryPercent.toFixed(1)}%` : '-'}</strong>
       </div>
-      <div className="sidebar-resource-track">
+      <div className={styles.resourceTrack}>
         <span style={{ width: `${stats ? clampPercent(stats.memoryPercent) : 0}%` }} />
       </div>
     </section>

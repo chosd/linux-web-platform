@@ -14,6 +14,10 @@ import {
   VolumeMountsEditor
 } from '/src/features/containers/components/volume-mounts-editor';
 import { Button } from '/src/shared/components/button';
+import { ErrorBanner, SuccessBanner } from '/src/shared/components/feedback';
+import { FormField } from '/src/shared/components/form-field';
+
+import styles from './container-components.module.css';
 
 export function ContainerCrudTool() {
   const [errorMessage, setErrorMessage] = useState('');
@@ -64,28 +68,26 @@ export function ContainerCrudTool() {
   };
 
   return (
-    <section className="crud-tool" aria-busy={isCreating}>
-      <form className="create-panel create-form-card" onSubmit={handleCreate}>
+    <section className={styles.crudTool} aria-busy={isCreating}>
+      <form className={`${styles.createPanel} ${styles.createFormCard}`} onSubmit={handleCreate}>
         <div>
           <h2>새 컨테이너</h2>
           <p>컨테이너 이름, root 비밀번호, 리소스 제한과 포트 포워딩을 설정합니다.</p>
         </div>
 
-        {errorMessage && <div className="error-banner">{errorMessage}</div>}
-        {successMessage && <div className="success-banner">{successMessage}</div>}
+        {errorMessage && <ErrorBanner>{errorMessage}</ErrorBanner>}
+        {successMessage && <SuccessBanner>{successMessage}</SuccessBanner>}
 
-        <div className="create-form-grid">
-          <div className="form-field">
-            <label htmlFor="container-display-name">컨테이너 이름</label>
+        <div className={styles.createFormGrid}>
+          <FormField htmlFor="container-display-name" label="컨테이너 이름">
             <input
               id="container-display-name"
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
               placeholder="Input Container name"
             />
-          </div>
-          <div className="form-field">
-            <label htmlFor="container-root-password">root 비밀번호</label>
+          </FormField>
+          <FormField htmlFor="container-root-password" label="root 비밀번호">
             <input
               id="container-root-password"
               type="password"
@@ -93,9 +95,8 @@ export function ContainerCrudTool() {
               onChange={(event) => setRootPassword(event.target.value)}
               placeholder="8자 이상"
             />
-          </div>
-          <div className="form-field">
-            <label htmlFor="container-cpu-cores">CPU 제한</label>
+          </FormField>
+          <FormField htmlFor="container-cpu-cores" label="CPU 제한">
             <input
               id="container-cpu-cores"
               type="number"
@@ -105,9 +106,8 @@ export function ContainerCrudTool() {
               value={cpuCores}
               onChange={(event) => setCpuCores(event.target.value)}
             />
-          </div>
-          <div className="form-field">
-            <label htmlFor="container-memory-mb">메모리 제한(MB)</label>
+          </FormField>
+          <FormField htmlFor="container-memory-mb" label="메모리 제한(MB)">
             <input
               id="container-memory-mb"
               type="number"
@@ -117,13 +117,13 @@ export function ContainerCrudTool() {
               value={memoryMb}
               onChange={(event) => setMemoryMb(event.target.value)}
             />
-          </div>
+          </FormField>
         </div>
 
         <PortBindingsEditor value={portBindings} onChange={setPortBindings} />
         <VolumeMountsEditor value={volumeMounts} onChange={setVolumeMounts} />
 
-        <div className="create-form-actions">
+        <div className={styles.createFormActions}>
           <Button
             type="submit"
             variant="primary"

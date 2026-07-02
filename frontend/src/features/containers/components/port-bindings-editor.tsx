@@ -1,5 +1,8 @@
 import { PortBindingPayload, PortProtocol } from '/src/features/containers/lib/container-api-client';
 import { Button } from '/src/shared/components/button';
+import { FormField } from '/src/shared/components/form-field';
+
+import styles from './container-components.module.css';
 
 type DraftPortBinding = {
   id: string;
@@ -37,8 +40,8 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
   };
 
   return (
-    <div className="port-bindings-editor">
-      <div className="port-bindings-header">
+    <div className={styles.settingsEditor}>
+      <div className={styles.editorHeader}>
         <div>
           <h3>포트 설정</h3>
           <p>외부에서 접속할 호스트 포트와 컨테이너 내부 포트를 연결합니다.</p>
@@ -49,18 +52,17 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
       </div>
 
       {value.length === 0 ? (
-        <div className="port-empty-hint">
+        <div className={styles.emptyHint}>
           설정된 포트 포워딩이 없습니다. 오른쪽 추가 버튼을 눌러 포트를 연결하세요.
         </div>
       ) : (
-        <div className="port-binding-list">
+        <div className={styles.portBindingList}>
           {value.map((binding) => {
             const hostPortError = binding.hostPort !== '' && !isValidHostPort(binding.hostPort);
             const containerPortError = binding.containerPort !== '' && !isValidContainerPort(binding.containerPort);
             return (
-              <div className="port-binding-row" key={binding.id}>
-                <div className="form-field">
-                  <label htmlFor={`${binding.id}-protocol`}>프로토콜</label>
+              <div className={styles.portBindingRow} key={binding.id}>
+                <FormField htmlFor={`${binding.id}-protocol`} label="프로토콜">
                   <select
                     id={`${binding.id}-protocol`}
                     value={binding.protocol}
@@ -69,9 +71,8 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
                     <option value="TCP">TCP</option>
                     <option value="UDP">UDP</option>
                   </select>
-                </div>
-                <div className="form-field">
-                  <label htmlFor={`${binding.id}-host-port`}>호스트 포트</label>
+                </FormField>
+                <FormField htmlFor={`${binding.id}-host-port`} label="호스트 포트">
                   <input
                     id={`${binding.id}-host-port`}
                     inputMode="numeric"
@@ -80,9 +81,8 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
                     placeholder="8080"
                     aria-invalid={hostPortError}
                   />
-                </div>
-                <div className="form-field">
-                  <label htmlFor={`${binding.id}-container-port`}>컨테이너 포트</label>
+                </FormField>
+                <FormField htmlFor={`${binding.id}-container-port`} label="컨테이너 포트">
                   <input
                     id={`${binding.id}-container-port`}
                     inputMode="numeric"
@@ -91,7 +91,7 @@ export function PortBindingsEditor({ value, onChange }: PortBindingsEditorProps)
                     placeholder="80"
                     aria-invalid={containerPortError}
                   />
-                </div>
+                </FormField>
                 <Button type="button" onClick={() => removeBinding(binding.id)}>
                   삭제
                 </Button>

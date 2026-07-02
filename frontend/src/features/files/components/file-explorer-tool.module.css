@@ -1,0 +1,182 @@
+.tool {
+  display: grid;
+  gap: 14px;
+  grid-template-rows: auto auto 1fr;
+  min-height: 0;
+  overflow: hidden;
+  padding: 18px;
+}
+
+.toolbar {
+  align-items: end;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px;
+}
+
+.toolbar select {
+  min-width: 260px;
+}
+
+.uploadButton {
+  align-items: center;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.uploadButton input {
+  display: none;
+}
+
+.explorerGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dropActive {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -4px;
+}
+
+.treePanel,
+.listPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.treePanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.treeHeader,
+.pathHeader {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px;
+}
+
+.treeHeader h2,
+.pathHeader h2 {
+  color: var(--color-text-strong);
+  font-size: 15px;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+
+.treeHeader span,
+.pathHeader p {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+.treeNav {
+  display: grid;
+  gap: 4px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.treeNode {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font: inherit;
+  min-height: 34px;
+  overflow-wrap: anywhere;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.treeNode:hover,
+.treeNodeActive {
+  background: var(--color-surface-strong);
+  border-color: var(--color-border);
+  color: var(--color-text-strong);
+}
+
+.listPanel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.tableScroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.fileTable {
+  border-collapse: collapse;
+  min-width: 720px;
+  width: 100%;
+}
+
+.fileTable th,
+.fileTable td {
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  padding: 12px;
+  text-align: left;
+}
+
+.fileTable th {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.fileTable tbody tr {
+  cursor: pointer;
+}
+
+.fileTable tbody tr:hover {
+  background: var(--color-surface-strong);
+}
+
+.fileNameCell {
+  align-items: center;
+  color: var(--color-text-strong);
+  display: inline-flex;
+  gap: 8px;
+  max-width: 420px;
+  overflow-wrap: anywhere;
+}
+
+.fileNameCell small {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 5px;
+}
+
+.uploadState {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  padding: 10px 14px;
+}

@@ -1,6 +1,9 @@
 import { VolumeMountPayload } from '/src/features/containers/lib/container-api-client';
 import { allowedVolumeHostPathBase } from '/src/features/containers/config/container-api';
 import { Button } from '/src/shared/components/button';
+import { FormField } from '/src/shared/components/form-field';
+
+import styles from './container-components.module.css';
 
 type DraftVolumeMount = {
   id: string;
@@ -36,8 +39,8 @@ export function VolumeMountsEditor({ value, onChange }: VolumeMountsEditorProps)
   };
 
   return (
-    <div className="volume-mounts-editor">
-      <div className="settings-editor-header">
+    <div className={styles.settingsEditor}>
+      <div className={styles.editorHeader}>
         <div>
           <h3>볼륨 설정</h3>
           <p>호스트 디렉토리를 컨테이너 내부 경로에 연결해 데이터를 보존합니다.</p>
@@ -48,18 +51,17 @@ export function VolumeMountsEditor({ value, onChange }: VolumeMountsEditorProps)
       </div>
 
       {value.length === 0 ? (
-        <div className="settings-empty-hint">
+        <div className={styles.emptyHint}>
           설정된 볼륨 마운트가 없습니다. 오른쪽 추가 버튼을 눌러 디렉토리를 연결하세요.
         </div>
       ) : (
-        <div className="volume-mount-list">
+        <div className={styles.volumeMountList}>
           {value.map((mount) => {
             const hostPathError = mount.hostPath !== '' && !isValidHostPath(mount.hostPath);
             const containerPathError = mount.containerPath !== '' && !isValidContainerPath(mount.containerPath);
             return (
-              <div className="volume-mount-row" key={mount.id}>
-                <div className="form-field">
-                  <label htmlFor={`${mount.id}-host-path`}>호스트 경로</label>
+              <div className={styles.volumeMountRow} key={mount.id}>
+                <FormField htmlFor={`${mount.id}-host-path`} label="호스트 경로">
                   <input
                     id={`${mount.id}-host-path`}
                     value={mount.hostPath}
@@ -67,9 +69,8 @@ export function VolumeMountsEditor({ value, onChange }: VolumeMountsEditorProps)
                     placeholder={`${normalizedAllowedVolumeHostPathBase()}/test2`}
                     aria-invalid={hostPathError}
                   />
-                </div>
-                <div className="form-field">
-                  <label htmlFor={`${mount.id}-container-path`}>컨테이너 경로</label>
+                </FormField>
+                <FormField htmlFor={`${mount.id}-container-path`} label="컨테이너 경로">
                   <input
                     id={`${mount.id}-container-path`}
                     value={mount.containerPath}
@@ -77,7 +78,7 @@ export function VolumeMountsEditor({ value, onChange }: VolumeMountsEditorProps)
                     placeholder="/workspace"
                     aria-invalid={containerPathError}
                   />
-                </div>
+                </FormField>
                 <Button type="button" onClick={() => removeMount(mount.id)}>
                   삭제
                 </Button>
