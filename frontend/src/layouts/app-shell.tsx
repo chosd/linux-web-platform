@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import { HostResourceStatsSample } from '/src/features/dashboard/lib/dashboard-api-client';
+import { useTheme } from '/src/shared/contexts/theme-context';
 
 export type AppMenuKey = 'dashboard' | 'containers' | 'files';
 
@@ -30,12 +31,25 @@ const navItems: Array<{ key: AppMenuKey; label: string; description: string }> =
 ];
 
 export function AppShell({ activeMenu, children, hostResourceStats, onSelectMenu }: AppShellProps) {
+  const { isDark, toggleTheme } = useTheme();
+
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Main navigation">
-        <div className="sidebar-brand">
-          <strong>Linux Terminal</strong>
-          <span>Platform</span>
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <strong>Linux Terminal</strong>
+            <span>Platform</span>
+          </div>
+          <button
+            type="button"
+            className="theme-toggle-button"
+            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            aria-pressed={isDark}
+            onClick={toggleTheme}
+          >
+            <span>{isDark ? 'Light' : 'Dark'}</span>
+          </button>
         </div>
         <nav className="sidebar-nav">
           {navItems.map((item) => (
