@@ -140,9 +140,7 @@ Assumption: 딥링크, 브라우저 뒤로가기, 새로고침 후 경로 보존
 
 ## 9. 테마 시스템 기준
 
-racofy 기준을 우선한다.
-
-- 기본 테마는 light이다.
+- 기본 테마는 dark이다.
 - 다크 테마는 `html.dark`, `html[data-theme="dark"]` CSS 변수 오버라이드로 처리한다.
 - 사용자의 테마 선택은 `localStorage`에 저장한다.
 - 테마 상태는 `src/shared/contexts/theme-context.tsx`에서 관리한다.
