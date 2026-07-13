@@ -1,0 +1,110 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+description = 'Web Linux terminal MVP backend'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation('com.github.docker-java:docker-java:3.7.1') {
+        exclude group: 'com.github.docker-java', module: 'docker-java-transport-jersey'
+    }
+    implementation 'com.github.docker-java:docker-java-transport-netty:3.7.1'
+    implementation 'com.github.docker-java:docker-java-transport-zerodep:3.7.1'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+def frontendDir = file('../frontend')
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def pnpmExecutable = providers.environmentVariable('PNPM_COMMAND').orElse(isWindows ? 'pnpm.cmd' : 'pnpm')
+def pnpmStoreDir = file("${frontendDir}/.pnpm-store")
+def pnpmHomeDir = file("${frontendDir}/.pnpm-home")
+def pnpmDataDir = file("${frontendDir}/.pnpm-data")
+def pnpmCommandLine = { List<String> args ->
+    isWindows
+            ? ['cmd', '/c', pnpmExecutable.get()] + args
+            : [pnpmExecutable.get()] + args
+}
+def configurePnpm = { Exec task ->
+    task.workingDir = frontendDir
+    task.doFirst {
+        if (!frontendDir.isDirectory()) {
+            throw new GradleException("Frontend directory not found: ${frontendDir}")
+        }
+        if (!file("${frontendDir}/package.json").isFile()) {
+            throw new GradleException("Frontend package.json not found: ${frontendDir}/package.json")
+        }
+        mkdir pnpmStoreDir
+        mkdir pnpmHomeDir
+        mkdir pnpmDataDir
+        environment 'PNPM_HOME', pnpmHomeDir.absolutePath
+        environment 'XDG_DATA_HOME', pnpmDataDir.absolutePath
+        environment 'npm_config_store_dir', pnpmStoreDir.absolutePath
+
+        def pnpmFile = file(pnpmExecutable.get())
+        if (pnpmFile.isAbsolute()) {
+            environment 'PATH', "${pnpmFile.parent}${File.pathSeparator}${System.getenv('PATH') ?: ''}"
+        }
+    }
+}
+
+tasks.register('frontendInstall', Exec) {
+    group = 'build'
+    description = 'Installs frontend dependencies with pnpm.'
+    configurePnpm(delegate)
+    commandLine pnpmCommandLine(['install'])
+}
+
+tasks.register('frontendBuild', Exec) {
+    group = 'build'
+    description = 'Builds frontend static assets with Vite.'
+    configurePnpm(delegate)
+    commandLine pnpmCommandLine(['run', 'build'])
+    dependsOn 'frontendInstall'
+}
+
+tasks.register('copyFrontendDist', Copy) {
+    group = 'build'
+    description = 'Copies Vite dist files into Spring Boot static resources.'
+    dependsOn 'frontendBuild'
+    from "${frontendDir}/dist"
+    into "${projectDir}/src/main/resources/static"
+    doFirst {
+        def distDir = file("${frontendDir}/dist")
+        if (!distDir.isDirectory()) {
+            throw new GradleException("Frontend dist directory not found. Run pnpm run build first: ${distDir}")
+        }
+        mkdir "${projectDir}/src/main/resources/static"
+    }
+}
+
+tasks.named('processResources') {
+    dependsOn 'copyFrontendDist'
+}

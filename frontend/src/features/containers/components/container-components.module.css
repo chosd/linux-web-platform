@@ -1,0 +1,670 @@
+.crudTool {
+  display: grid;
+  gap: var(--layout-gap);
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+
+.createWorkspace {
+  align-items: stretch;
+  display: grid;
+  gap: var(--layout-gap);
+  grid-template-columns: minmax(20rem, 1.05fr) minmax(18rem, 0.95fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+.createPanel,
+.tablePanel,
+.composePanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.createPanel {
+  display: grid;
+  gap: var(--layout-gap);
+  padding: var(--layout-padding);
+}
+
+.createPanel h2,
+.editorHeader h3,
+.composeHeader h3,
+.networkCard h3 {
+  color: var(--color-text-strong);
+  line-height: 1.25;
+  margin: 0 0 5px;
+}
+
+.createPanel h2 {
+  font-size: 16px;
+}
+
+.createPanel p,
+.editorHeader p,
+.composeHeader p {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.editorHeader h3,
+.composeHeader h3,
+.networkCard h3 {
+  font-size: 13px;
+}
+
+.editorHeader p,
+.composeHeader p {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.createFormGrid {
+  display: grid;
+  gap: var(--layout-gap);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.createFormActions {
+  display: flex;
+  gap: var(--layout-gap);
+  justify-content: flex-end;
+}
+
+.composePanel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--layout-gap);
+  min-height: clamp(30rem, 72vh, 50rem);
+  min-width: 0;
+  overflow: visible;
+  padding: var(--layout-padding);
+  position: sticky;
+  top: var(--layout-padding);
+}
+
+.composeHeader {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.composeHeader > div {
+  min-width: 0;
+}
+
+.composeHeader button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.composeTextarea {
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  height: 100%;
+  max-height: 42rem;
+  min-height: 15rem;
+  outline: none;
+  overflow: auto;
+  padding: clamp(0.75rem, 1vw, 1rem);
+  resize: none;
+  tab-size: 2;
+  white-space: pre;
+  width: 100%;
+}
+
+.composeTextarea:focus {
+  border-color: var(--color-primary-border);
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.16);
+}
+
+.composeActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.composeActions button {
+  width: auto;
+  min-width: 110px;
+  height: 38px;
+  font-size: 13px;
+  padding: 0 16px;
+}
+
+.tablePanel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tableScroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.containerTable {
+  border-collapse: collapse;
+  min-width: min(60rem, 100%);
+  width: 100%;
+}
+
+.containerTable th,
+.containerTable td {
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  padding: clamp(0.55rem, 0.8vw, 0.9rem);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.containerTable th {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.inlineEditGrid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 2fr 1fr 1fr;
+  width: 100%;
+}
+
+.inlineEditInput {
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  font: inherit;
+  min-height: 38px;
+  min-width: 0;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.identityCell,
+.resourceLimitCell {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.identityCell strong {
+  color: var(--color-text-strong);
+  font-size: 14px;
+  line-height: 1.25;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+}
+
+.identityCell span {
+  color: var(--color-text-subtle);
+  cursor: help;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+.resourceLimitCell span {
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.resourceLimitCell small {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.tableActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actionMenu {
+  position: relative;
+}
+
+.actionMenuTrigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 18px;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 36px;
+}
+
+.actionMenuTrigger:hover:not(:disabled),
+.actionMenuTrigger[aria-expanded="true"] {
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.actionMenuTrigger:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.actionMenuPopover {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-elevated);
+  display: grid;
+  gap: 4px;
+  min-width: 132px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+}
+
+.actionMenuPopover button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  min-height: 34px;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.actionMenuPopover button:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.actionMenuPopover button:disabled {
+  color: var(--color-text-subtle);
+  cursor: not-allowed;
+}
+
+.dangerMenuItem {
+  color: var(--color-danger-text) !important;
+}
+
+.statsPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: grid;
+  grid-template-rows: auto 220px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.statsSummary {
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.statsChart {
+  min-height: 0;
+  padding: 10px 12px 12px;
+}
+
+.settingsEditor {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.editorHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.emptyHint {
+  background: var(--color-sunken);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 14px;
+}
+
+.portBindingList,
+.volumeMountList {
+  display: grid;
+  gap: 10px;
+}
+
+.portBindingRow {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 90px minmax(70px, 1fr) minmax(70px, 1fr) auto;
+}
+
+.volumeMountRow {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(8rem, 1.25fr) minmax(7rem, 1fr) minmax(90px, 1.1fr) auto;
+}
+
+.networkDrawerRoot {
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  transition: opacity 180ms ease;
+  z-index: 80;
+}
+
+.networkDrawerRootOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.networkDrawerBackdrop {
+  background: rgb(0 0 0 / 0.52);
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.networkDrawer {
+  background: var(--color-bg-elevated);
+  border-left: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevated);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  margin-left: auto;
+  max-width: var(--drawer-width);
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+  width: var(--drawer-width);
+}
+
+.networkDrawerRootOpen .networkDrawer {
+  transform: translateX(0);
+}
+
+.networkDrawerHeader {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--layout-gap);
+  justify-content: space-between;
+  padding: var(--layout-padding);
+}
+
+.networkDrawerHeader span {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.networkDrawerHeader h2 {
+  color: var(--color-text-strong);
+  font-size: clamp(1rem, 1.3vw, 1.35rem);
+  line-height: 1.2;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.networkDrawerHeader p {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.drawerCloseButton {
+  align-items: center;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 22px;
+  height: var(--control-height);
+  justify-content: center;
+  line-height: 1;
+  width: var(--control-height);
+}
+
+.networkDrawerContent {
+  display: grid;
+  gap: var(--layout-gap);
+  min-height: 0;
+  overflow: auto;
+  padding: var(--layout-padding);
+}
+
+.networkError {
+  margin: var(--layout-gap) var(--layout-padding) 0;
+}
+
+.drawerEmptyState {
+  color: var(--color-text-muted);
+  padding: var(--layout-padding);
+}
+
+.networkCard {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  display: grid;
+  gap: var(--layout-gap);
+  min-width: 0;
+  padding: clamp(0.75rem, 1vw, 1.25rem);
+}
+
+.networkHero {
+  background: linear-gradient(135deg, var(--color-accent-soft), var(--color-cyan-soft));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  display: grid;
+  gap: clamp(0.5rem, 0.7vw, 0.9rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: clamp(0.75rem, 1vw, 1.25rem);
+}
+
+.networkHero div {
+  display: grid;
+  gap: 3px;
+}
+
+.networkHero span,
+.networkCardHeader span {
+  color: var(--color-text-subtle);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.networkHero strong {
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 24px;
+}
+
+.networkHero p {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  grid-column: 1 / -1;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.networkCardHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.networkCardHeader h3 {
+  margin-bottom: 0;
+}
+
+.networkSelectLabel {
+  color: var(--color-text-muted);
+  display: grid;
+  font-size: 11px;
+  gap: 6px;
+}
+
+.networkSelectLabel select {
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  font: inherit;
+  min-height: 38px;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.networkActionRow {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.networkList,
+.portMappingList {
+  display: grid;
+  gap: 8px;
+}
+
+.networkRow,
+.portMappingRow {
+  align-items: center;
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.networkRowTitle {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.networkRowTitle span {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: 999px;
+  color: var(--color-success-text);
+  font-size: 10px;
+  padding: 2px 7px;
+}
+
+.networkMetadata {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.networkMetadata div {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 62px minmax(0, 1fr);
+}
+
+.networkMetadata dt {
+  color: var(--color-text-subtle);
+  font-size: 10px;
+}
+
+.networkMetadata dd {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.networkRow strong,
+.portMappingRow span {
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.networkRow span,
+.portMappingRow a {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.portMappingRow {
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.networkRow small,
+.portMappingRow small,
+.emptyInline {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 1150px) {
+  .createWorkspace {
+    grid-template-columns: 1fr;
+  }
+  .composePanel {
+    position: static;
+    min-height: auto;
+    height: 40rem;
+  }
+}

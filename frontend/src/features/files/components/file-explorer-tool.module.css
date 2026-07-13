@@ -1,0 +1,424 @@
+.tool {
+  display: grid;
+  gap: clamp(0.375rem, 0.55vw, 0.75rem);
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: clamp(8px, 1.4vw, 16px);
+}
+
+.connectionBar,
+.actionBar,
+.breadcrumbBar,
+.transferPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  min-width: 0;
+}
+
+.connectionBar {
+  align-items: center;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  display: grid;
+  gap: clamp(0.5rem, 0.7vw, 0.9rem);
+  grid-template-columns: minmax(14rem, 0.9fr) auto minmax(18rem, 1.5fr);
+  padding: clamp(0.55rem, 0.75vw, 0.9rem);
+}
+
+.serverIdentity {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.serverIdentity > div {
+  display: grid;
+  min-width: 0;
+}
+
+.serverIdentity strong,
+.serverIdentity span,
+.remotePath code,
+.transferFile {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.serverIdentity strong {
+  color: var(--color-text-strong);
+  font-size: 13px;
+}
+
+.serverIdentity span {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.serverIcon,
+.fileIcon {
+  align-items: center;
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  color: var(--color-cyan);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.remotePath {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.remotePath span {
+  color: var(--color-text-subtle);
+  font-size: 11px;
+}
+
+.remotePath code {
+  background: var(--color-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-strong);
+  display: block;
+  font-size: 11px;
+  padding: 7px 9px;
+}
+
+.actionBar {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  overflow-x: auto;
+  padding: 8px 10px;
+}
+
+.primaryActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.uploadButton {
+  align-items: center;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
+.uploadButton[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.uploadButton input {
+  display: none;
+}
+
+.breadcrumbBar {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  min-height: 34px;
+  overflow-x: auto;
+  padding: 5px 10px;
+}
+
+.breadcrumbBar span {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.breadcrumbBar i {
+  color: var(--color-text-subtle);
+  font-style: normal;
+}
+
+.breadcrumbBar button {
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 5px;
+}
+
+.breadcrumbBar button:hover {
+  color: var(--color-primary);
+}
+
+.explorerGrid {
+  display: grid;
+  grid-template-columns: clamp(14rem, 20vw, 24rem) minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.dropActive {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -3px;
+}
+
+.dropOverlay {
+  align-items: center;
+  background: rgb(59 130 246 / 0.14);
+  color: var(--color-primary);
+  display: flex;
+  font-size: 16px;
+  font-weight: 700;
+  inset: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  z-index: 10;
+}
+
+.treePanel,
+.listPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.treePanel {
+  border-radius: 0 0 0 var(--radius-card);
+  border-right: 0;
+}
+
+.listPanel {
+  border-radius: 0 0 var(--radius-card) 0;
+}
+
+.panelHeader {
+  align-items: center;
+  background: var(--color-surface-strong);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 11px;
+}
+
+.panelHeader strong {
+  color: var(--color-text-strong);
+  font-size: 12px;
+}
+
+.panelHeader span {
+  color: var(--color-text-subtle);
+  font-size: 10px;
+}
+
+.treeNav,
+.tableScroll {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.treeNav {
+  padding: 6px 0;
+}
+
+.treeNode {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 12px;
+  gap: 6px;
+  min-height: 29px;
+  min-width: 100%;
+  padding-right: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.treeNode:hover,
+.treeNodeActive {
+  background: var(--color-surface-hover);
+  color: var(--color-text-strong);
+}
+
+.treeNodeActive {
+  box-shadow: inset 3px 0 var(--color-primary);
+}
+
+.fileTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: min(56rem, 100%);
+  width: 100%;
+}
+
+.fileTable th,
+.fileTable td {
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+  padding: 8px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.fileTable th {
+  background: var(--color-surface-strong);
+  color: var(--color-text-subtle);
+  font-size: 10px;
+  position: sticky;
+  text-transform: uppercase;
+  top: 0;
+  z-index: 2;
+}
+
+.fileTable th:first-child {
+  width: 48%;
+}
+
+.fileTable tbody tr {
+  cursor: default;
+  outline: none;
+}
+
+.fileTable tbody tr:hover,
+.fileTable tbody tr[aria-selected="true"] {
+  background: var(--color-surface-hover);
+}
+
+.fileTable tbody tr:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.fileNameCell {
+  align-items: center;
+  color: var(--color-text-strong);
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fileNameCell > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileIcon {
+  border-radius: 5px;
+  height: 21px;
+  width: 21px;
+}
+
+.transferPanel {
+  border-radius: var(--radius-card);
+  display: grid;
+  gap: 7px;
+  padding: 9px 11px;
+}
+
+.transferSummary,
+.transferDetail {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.transferSummary {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.transferSummary strong {
+  color: var(--color-text-strong);
+  font-size: 11px;
+}
+
+.transferSummary span {
+  color: var(--color-text-subtle);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transferDetail {
+  grid-template-columns: minmax(10rem, 1fr) minmax(12rem, 2fr) clamp(2.5rem, 3vw, 3.25rem) auto;
+}
+
+.transferFile {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.progressTrack {
+  background: var(--color-track-bg);
+  border-radius: 999px;
+  height: 7px;
+  overflow: hidden;
+}
+
+.progressTrack span {
+  background: var(--color-primary);
+  display: block;
+  height: 100%;
+  transition: width 120ms linear;
+}
+
+.transferDetail > strong {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-align: right;
+}
+
+@media (max-height: 700px) {
+  .tool {
+    gap: 5px;
+    padding-block: 5px;
+  }
+
+  .connectionBar,
+  .actionBar,
+  .transferPanel {
+    padding-block: 6px;
+  }
+
+  .transferSummary {
+    display: none;
+  }
+}

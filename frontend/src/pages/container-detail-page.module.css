@@ -1,0 +1,112 @@
+.page {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.headerActions {
+  align-items: center;
+  display: flex;
+  gap: clamp(0.35rem, 0.5vw, 0.75rem);
+}
+
+.detailHeader {
+  padding-block: clamp(0.5rem, 0.85vw, 0.875rem);
+}
+
+.tabs {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: clamp(0.4rem, 0.65vw, 0.75rem) var(--layout-padding);
+}
+
+.tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  min-height: var(--control-height);
+  padding: 0 clamp(0.55rem, 0.8vw, 0.9rem);
+}
+
+.tab:hover,
+.tabActive {
+  background: var(--color-surface-strong);
+  border-color: var(--color-border);
+  color: var(--color-text-strong);
+}
+
+.content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workSurface {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.overviewContainer { display: flex; flex-direction: column; gap: var(--layout-gap); height: 100%; overflow-y: auto; padding: var(--layout-padding); }
+.overview { height: auto; overflow: visible; padding: 0; }
+.overviewStats { margin-top: calc(var(--layout-gap) / 2); min-height: 25rem; }
+.statsPanel { height: 100%; overflow: auto; padding: var(--layout-padding); }
+.overviewGrid { display: grid; gap: var(--layout-gap); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.overviewGrid article { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); display: grid; gap: 10px; min-height: 110px; padding: 16px; }
+.overviewGrid span { color: var(--color-text-subtle); font-size: 11px; text-transform: uppercase; }
+.overviewGrid strong, .overviewGrid code { color: var(--color-text-strong); font-size: 14px; overflow-wrap: anywhere; }
+.statsPanel > * { height: auto; min-height: 22rem; }
+.networkEmpty { align-items: center; background: var(--color-surface); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-card); color: var(--color-text-muted); display: flex; justify-content: center; min-height: 14rem; padding: 24px; text-align: center; }
+@media (max-width: 820px) { .overviewGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .overviewGrid { grid-template-columns: 1fr; } }
+
+.networkPanel {
+  display: grid;
+  gap: var(--layout-gap);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--layout-padding);
+}
+
+.networkIntro {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: flex;
+  gap: var(--layout-gap);
+  justify-content: space-between;
+  min-width: 0;
+  padding: clamp(0.75rem, 1vw, 1rem);
+}
+
+.networkIntro div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.networkIntro span {
+  color: var(--color-text-subtle);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.networkIntro strong {
+  color: var(--color-text-strong);
+  font-size: 15px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}

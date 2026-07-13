@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-bg: #f8fafc;
+  --color-app-bg-elevated: #eef2f7;
+  --color-app-surface: #ffffff;
+  --color-app-surface-strong: #f1f5f9;
+  --color-app-surface-hover: #e2e8f0;
+  --color-app-terminal: #0f172a;
+  --color-app-border: rgb(15 23 42 / 0.1);
+  --color-app-border-strong: rgb(15 23 42 / 0.18);
+  --color-app-text: #1f2937;
+  --color-app-text-strong: #0f172a;
+  --color-app-text-muted: #64748b;
+  --color-app-text-subtle: #7b8794;
+  --color-app-primary: #3b82f6;
+  --color-app-primary-hover: #2563eb;
+  --color-app-accent: #7c3aed;
+  --color-app-cyan: #0891b2;
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --shadow-elevated: 0 18px 60px rgb(0 0 0 / 0.32);
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  --layout-gap: clamp(0.625rem, 1vw, 1.25rem);
+  --layout-padding: clamp(0.75rem, 1.5vw, 1.5rem);
+  --sidebar-width: clamp(13rem, 16vw, 18rem);
+  --control-height: clamp(2.125rem, 2.3vw, 2.5rem);
+  --drawer-width: clamp(26rem, 34vw, 38rem);
+}
+
+:root {
+  color-scheme: light;
+  --color-bg: #f4f6f8;
+  --color-bg-elevated: #eaecf0;
+  --color-surface: #ffffff;
+  --color-surface-strong: #f1f5f9;
+  --color-surface-hover: #e2e8f0;
+  --color-terminal: #0f172a;
+  --color-border: rgb(15 23 42 / 0.08);
+  --color-border-strong: rgb(15 23 42 / 0.15);
+  --color-text: #2d3748;
+  --color-text-strong: #1a202c;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #7b8794;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-border: rgb(59 130 246 / 0.45);
+  --color-accent: #7c3aed;
+  --color-accent-soft: rgb(124 58 237 / 0.12);
+  --color-cyan: #0891b2;
+  --color-cyan-soft: rgb(8 145 178 / 0.12);
+  --color-danger-bg: rgb(254 226 226 / 0.9);
+  --color-danger-border: rgb(220 38 38 / 0.28);
+  --color-danger-text: #991b1b;
+  --color-success-bg: rgb(220 252 231 / 0.92);
+  --color-success-border: rgb(22 163 74 / 0.3);
+  --color-success-text: #166534;
+  --color-input-bg: #ffffff;
+  --color-sunken: #f8fafc;
+  --color-track-bg: #e2e8f0;
+  --shadow-elevated: 0 18px 48px rgb(15 23 42 / 0.12);
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Cascadia Mono", "Fira Code", Consolas, monospace;
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+}
+
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0d0e12;
+  --color-bg-elevated: #121318;
+  --color-surface: #16171d;
+  --color-surface-strong: #1a1b23;
+  --color-surface-hover: #20222c;
+  --color-terminal: #090a0d;
+  --color-border: rgb(255 255 255 / 0.08);
+  --color-border-strong: rgb(255 255 255 / 0.14);
+  --color-text: #e7edf3;
+  --color-text-strong: #f7f8fb;
+  --color-text-muted: #a7adbc;
+  --color-text-subtle: #747b8d;
+  --color-primary: #5b8cff;
+  --color-primary-hover: #78a2ff;
+  --color-primary-border: rgb(91 140 255 / 0.55);
+  --color-accent: #a855f7;
+  --color-accent-soft: rgb(168 85 247 / 0.18);
+  --color-cyan: #22d3ee;
+  --color-cyan-soft: rgb(34 211 238 / 0.14);
+  --color-danger-bg: rgb(127 29 39 / 0.34);
+  --color-danger-border: rgb(248 113 113 / 0.34);
+  --color-danger-text: #fecdd3;
+  --color-success-bg: rgb(20 83 45 / 0.28);
+  --color-success-border: rgb(74 222 128 / 0.28);
+  --color-success-text: #bbf7d0;
+  --color-input-bg: var(--color-terminal);
+  --color-sunken: var(--color-terminal);
+  --color-track-bg: var(--color-terminal);
+  --shadow-elevated: 0 18px 60px rgb(0 0 0 / 0.32);
+}
+
+* {
+  box-sizing: border-box;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 160ms;
+  transition-timing-function: ease;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--color-bg);
+  min-width: 64rem;
+}

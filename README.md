@@ -1,131 +1,137 @@
-# Web Linux Terminal MVP
+# Linux Web Platform
 
-브라우저에서 xterm.js 터미널을 열고, 입력을 Spring Boot WebSocket 백엔드로 전달해 세션별 Ubuntu Docker 컨테이너 내부 `/bin/bash`에서 실행하는 1차 MVP입니다.
+브라우저에서 Docker 컨테이너를 생성·관리하고, xterm.js 터미널과 파일 탐색기, 리소스 및 네트워크 대시보드를 사용하는 내부 개발 도구입니다.
 
 ## 기술 스택
 
-- Frontend: React, TypeScript, Vite, xterm, xterm-addon-fit
-- Backend: Spring Boot 3.x, Java 21, Spring WebSocket
-- Runtime sandbox: Docker, `ubuntu:24.04`
+- Frontend: React 18, React Router, TypeScript, Vite 8, xterm.js, Recharts, Vitest
+- Backend: Spring Boot 3.3, Java 21, Spring WebSocket, SSE, docker-java
+- Runtime: Docker Engine API, `ubuntu:24.04`
 
-## 구조
+## 프로젝트 구조
 
 ```text
 backend/
   src/main/java/com/example/linuxterminal/
-    LinuxTerminalApplication.java
-    terminal/
-      WebSocketConfig.java
-      TerminalWebSocketHandler.java
-      TerminalSession.java
-      TerminalSessionManager.java
-      DockerTerminalService.java
-      TerminalProperties.java
+    domains/
+      container/   # 컨테이너 CRUD, 상태 및 리소스 통계
+      dashboard/   # 호스트 리소스
+      network/     # Docker 네트워크와 포트
+      sftp/        # 컨테이너 파일 관리
+      terminal/    # WebSocket 터미널 세션
+    global/        # Docker Engine client, 설정, 예외, 필터, SPA fallback
   src/main/resources/application.yml
+  src/test/
 frontend/
-  src/terminal/TerminalView.tsx
-docker/
-  terminal/Dockerfile
+  src/
+    app/           # 애플리케이션 진입점과 URL route 상태
+    features/      # containers, dashboard, files, terminal
+    layouts/
+    pages/
+    shared/
+    styles/
+  vite.config.ts
+config/application.yml
+docker/terminal/Dockerfile
+scripts/
 ```
 
-## Docker 이미지 빌드
+## 주요 기능
+
+- `/dashboard`, `/containers`, `/containers/{containerName}/{tab}` URL 기반 화면 복원
+- 컨테이너 생성, 조회, 수정, 삭제, 시작, 중지, 재시작
+- CPU·memory 제한, 포트 binding, volume mount 설정
+- 호스트 polling 및 컨테이너 SSE 리소스 차트
+- WebSocket 터미널 연결
+- FileZilla 스타일 파일 탐색, 업로드 진행·취소, 다운로드, 디렉터리 생성, 이름 변경, 삭제
+- Docker bridge 네트워크 조회·생성 및 컨테이너 연결·해제
+- light/dark theme
+
+## 사전 준비
+
+- Java 21
+- Docker
+- pnpm 11
+
+터미널 이미지:
 
 ```bash
 docker build -t linux-terminal-playground:ubuntu docker/terminal
 ```
 
-## 백엔드 실행
+## 개발 실행
+
+백엔드:
 
 ```bash
-cd backend
-mvn spring-boot:run
+./scripts/dev-backend.sh
 ```
 
-기본 WebSocket endpoint는 다음과 같습니다.
-
-```text
-ws://localhost:8080/ws/terminal
-```
-
-`backend/src/main/resources/application.yml`에서 이미지, idle timeout, Docker 리소스 제한을 변경할 수 있습니다.
-
-## 프론트엔드 실행
+프런트엔드:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+./scripts/dev-frontend.sh
 ```
 
-필요하면 `.env.local`에 WebSocket URL을 지정합니다.
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080`
+- WebSocket: `ws://localhost:8080/ws/terminal`
+
+프런트 환경 변수는 `frontend/.env.local`에 지정할 수 있습니다.
 
 ```bash
+VITE_API_BASE_URL=http://localhost:8080
 VITE_TERMINAL_WS_URL=ws://localhost:8080/ws/terminal
+VITE_USER_ID=anonymous
 ```
 
-## 테스트 방법
+## 설정
 
-브라우저 터미널에서 아래 명령을 순서대로 실행합니다.
+공통 런타임 설정은 `config/application.yml`에서 관리합니다.
 
-```bash
-pwd
-whoami
-ls -al
-mkdir test
-cd test
-touch hello.txt
-echo hello > hello.txt
-cat hello.txt
-ps
-```
+- 업로드 최대 크기: `512MB`
+- idle timeout: `30m`
+- Docker 제한: CPU `0.5`, memory `256m`, pids `64`
+- Docker host: `terminal.docker.host`
+- 기본 network: `bridge`
+- 컨테이너 사용자: `suser`
+- volume bind: 새 컨테이너 생성 화면에서 입력한 호스트 절대 경로를 그대로 사용
 
-브라우저 새로고침 또는 WebSocket 연결 종료 후 아래 명령으로 컨테이너가 삭제되는지 확인합니다.
-
-```bash
-docker ps -a --filter "name=linux-terminal-"
-```
-
-백엔드 단위 테스트:
-
-```bash
-cd backend
-mvn test
-```
-
-프론트엔드 빌드 테스트:
+## 테스트와 빌드
 
 ```bash
 cd frontend
-npm run build
+pnpm run test
+pnpm run build
 ```
 
-## 현재 구현 범위
+```bash
+cd backend
+./gradlew test
+```
 
-- `/ws/terminal` WebSocket endpoint
-- WebSocket 세션별 Docker 컨테이너 생성
-- `docker run -i`로 컨테이너 내부 `/bin/bash` 실행
-- 브라우저 입력을 컨테이너 bash stdin으로 전달
-- 컨테이너 stdout/stderr를 WebSocket으로 전달
-- WebSocket 종료, transport error, idle timeout 시 `docker rm -f` 정리
-- idle timeout 기본 10분
-- 만료 세션 정리 기본 1분 주기
-- CPU, memory, pids, network, user, workdir 제한 설정
+루트 통합 스크립트:
 
-## 보안 주의사항
+```bash
+./scripts/test-all.sh
+./scripts/build-all.sh
+```
 
-- 사용자 입력을 host bash에서 실행하지 않습니다.
-- Docker 명령은 고정 인자 리스트로 구성하며 사용자 입력을 Docker 실행 명령에 넣지 않습니다.
-- 컨테이너 네트워크는 `--network=none`입니다.
-- 컨테이너는 `student` 사용자로 실행합니다.
-- 리소스 제한은 `--cpus=0.5`, `--memory=256m`, `--pids-limit=64`입니다.
-- 운영 환경에서는 Docker daemon 접근 권한 자체가 강한 권한이므로 별도 격리된 실행 노드에서 운영해야 합니다.
-- 현재 MVP는 인증/인가, 세션 quota, 감사 로그, 파일 업로드 제한을 포함하지 않습니다.
+백엔드 `build`는 pnpm install과 Vite build를 수행하고 결과를 Spring Boot static resource로 복사합니다.
 
-## 다음 TODO
+## 보안 및 운영 주의사항
 
-- WebSocket 인증/인가 추가
-- 사용자별 동시 세션 수 제한
-- 컨테이너 생성 실패 메시지의 프론트 표시 개선
-- 터미널 resize 정보를 백엔드와 컨테이너 PTY에 전달
-- `docker run` 대신 PTY 지원이 있는 Docker Java client 또는 전용 terminal bridge 검토
-- 컨테이너 이미지 취약점 스캔 및 패키지 최소화
+- 현재 인증·인가가 없는 내부 개발 도구입니다. 외부 네트워크에 직접 공개하지 마세요.
+- `X-User-Id`와 `VITE_USER_ID`는 데이터 구분자이며 인증 수단이 아닙니다.
+- Docker daemon 접근 권한은 host의 강한 권한이므로 격리된 개발 노드에서 실행하세요.
+- Docker Engine API를 통해 컨테이너를 제어하며 컨테이너 경로 순회와 잘못된 파일명을 차단합니다.
+- root 비밀번호는 컨테이너 생성 시 `chpasswd` 표준 입력으로 전달되지만 운영용 secret 저장 기능은 제공하지 않습니다.
+
+## 남은 개선 후보
+
+- 외부 공개 전 인증·인가, 사용자 quota, 감사 로그
+- 전용 terminal bridge로 PTY 처리 강화
+- 파일 미리보기·편집 및 다중 파일 압축 다운로드
+- 네트워크 삭제와 포트 binding 변경 UI
+- 브라우저 E2E 및 실제 Docker 통합 테스트
+- 컨테이너 이미지 취약점 검사와 패키지 최소화

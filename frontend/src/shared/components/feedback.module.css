@@ -1,0 +1,26 @@
+.errorBanner {
+  background: var(--color-danger-bg);
+  border-bottom: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  padding: 10px 18px;
+}
+
+.successBanner {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-control);
+  color: var(--color-success-text);
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 10px 12px;
+}
+
+.emptyState {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text-muted);
+  grid-column: 1 / -1;
+  padding: 28px;
+  text-align: center;
+}

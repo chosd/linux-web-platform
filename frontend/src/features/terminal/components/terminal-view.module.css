@@ -1,0 +1,176 @@
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.toolbar {
+  align-items: center;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.titleGroup {
+  min-width: 0;
+}
+
+.toolbar h1 {
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.connectionRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statusMessage {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.workspace {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) clamp(13rem, 16vw, 16rem);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.shell {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.host {
+  background: var(--color-terminal);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  width: 100%;
+}
+
+.terminalSurface {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.usagePanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  color: var(--color-text);
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.usagePanel h2 {
+  color: var(--color-text-strong);
+  font-size: 13px;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.usagePanel h2:not(:first-child) {
+  margin-top: 18px;
+}
+
+.usagePanel ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.usagePanel li {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0 0 8px;
+}
+
+.usagePanel code {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  color: var(--color-text-strong);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin-top: 8px;
+  padding: 7px 8px;
+}
+
+.terminalSurface :global(.xterm) {
+  height: 100%;
+}
+
+.terminalSurface :global(.xterm-screen) {
+  height: 100%;
+}
+
+.terminalSurface :global(.xterm-viewport) {
+  overflow-y: auto;
+}
+
+.terminalSurface :global(.xterm-cursor) {
+  animation-duration: 1s;
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .toolbar button,
+  .actions {
+    width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 8px;
+  }
+
+  .host {
+    min-height: 0;
+  }
+}

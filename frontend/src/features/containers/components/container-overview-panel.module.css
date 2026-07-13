@@ -1,0 +1,11 @@
+.panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); display: grid; min-height: 0; overflow: hidden; }
+.counts { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 14px 16px 4px; }
+.counts div { background: var(--color-surface-strong); border: 1px solid var(--color-border); border-radius: var(--radius-control); display: grid; gap: 5px; padding: 12px; }
+.counts span { color: var(--color-text-subtle); font-size: 11px; }
+.counts strong { color: var(--color-text-strong); font-size: 22px; }
+.list { display: grid; overflow: auto; padding: 10px 16px 16px; }
+.list button { align-items: center; background: transparent; border: 0; border-bottom: 1px solid var(--color-border); color: inherit; cursor: pointer; display: flex; gap: 12px; justify-content: space-between; min-height: 58px; padding: 8px 4px; text-align: left; }
+.list button:hover { background: var(--color-surface-hover); }
+.list button > span { display: grid; gap: 3px; min-width: 0; }
+.list strong { color: var(--color-text-strong); font-size: 13px; }
+.list small { color: var(--color-text-muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

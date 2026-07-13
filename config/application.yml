@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 512MB
+      max-request-size: 512MB
+
+terminal:
+  image: linux-terminal-playground:ubuntu
+  idle-timeout: 30m
+  cleanup-interval: 60000
+  allowed-origins:
+    - http://localhost:5173
+    - http://127.0.0.1:5173
+  docker:
+    host: unix:///var/run/docker.sock
+    cpus: "0.5"
+    memory: 256m
+    pids-limit: 64
+    network: bridge
+    user: suser
+    workdir: /home/suser
+    command:
+      - /usr/bin/script
+      - -qfec
+      - /bin/bash --login
+      - /dev/null
+    container-name-prefix: linux-terminal
+    container-name-session-id-length: 24
